@@ -1,0 +1,5 @@
+wget == 3.2
+rapids-singlecell == 0.12.1
+squidpy == 1.6.4
+zarr == 2.18.* 
+jupyterlab
