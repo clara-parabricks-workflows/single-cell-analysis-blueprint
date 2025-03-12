@@ -23,7 +23,7 @@ This repository contains a diverse set of notebooks to help get anyone started u
 
 
 
-![layout architecture](https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/assets/scdiagram.png)
+![layout architecture](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/assets/scdiagram.png)
 
 
 The outline below is a suggested exploration flow.  Unless otherwise noted, you can choose any notebook to get started, as long as you have the GPU resources to run the notebook.
@@ -43,7 +43,7 @@ For those who are new to doing basic analysis for single cell data, the end to e
 
 **Note:** To ensure you have the maximum GPU memory available, **please remember to shut down your completed notebook's kernel before starting a new notebook**.  If you don't, you may experience Out Of Memory (OOM) based errors.  To fix that, simply kill all the kernels, and the restart only the kernel for the notebook you want to run.
 
-<div align="center"><img src="https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/assets/kernel.png" width="460px"/>&nbsp</div>
+<div align="center"><img src="https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/assets/kernel.png" width="460px"/>&nbsp</div>
 <br>
 
 # Deploying this Repository
@@ -61,38 +61,37 @@ Please click this button to deploy this Repo using Brev.dev's Launchables
 
 2. Click **Deploy Launchable** on the Brev.dev Launchable page
 
-   ![deploy_brev](https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/assets/deploy_brev.png)
+   ![deploy_brev](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/assets/deploy_brev.png)
    
 3. Wait for the Container status show **Ready** (can take up to 8 minutes).  Then, click **Access GPU**
 
-   ![go_on_green](https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/assets/go_on_green.png)
+   ![go_on_green](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/assets/go_on_green.png)
    
 4. On the **Instance** page, click **Open Notebook**
 
-   ![open_notebook](https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/assets/open_notebook.png)
+   ![open_notebook](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/assets/open_notebook.png)
 
 You should drop into a fully installed and populated JupyterLab environment.  Open up your desired notebook, and have a great time!
 
 ### Making this Launchable Portable on Brev (knowledgeable users only)
 If using Brev to create a new Launchable or Standalone Compute Instance, so that you can use your desired cloud provider: 
 - In **Compute**, remember the GPU requirements when picking an instance
-- When adding the **Container**, use Docker Compose.  In most cases, please use the docker-compose file, **[docker/brev/docker-compose-nb-2412.yaml](https://github.com/clara-parabricks-workflows/RAPIDS-singlecell-introduction-notebooks/raw/main/docker/brev/docker-compose-nb-2412.yaml)** as your base.  You *can* make edits, but will not be a recommended activity.  Instead use and install additional packages using the `requirements.txt` found in this repo as a base.  **Do not** Preinstall Jupyter.
+- When adding the **Container**, use Docker Compose.  In most cases, please use the docker-compose file, **[docker/brev/docker-compose-nb-2412.yaml](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/raw/main/docker/brev/docker-compose-nb-2412.yaml)** as your base.  You *can* make edits, but will not be a recommended activity.  Instead use and install additional packages using the `requirements.txt` found in this repo as a base.  **Do not** Preinstall Jupyter.
 - For **Files**, please clone this repo, or any repo of your choosing
-- In **Ports**, please open ports **8888, 8787, and 8786**.
-
-Git is not installed in this container, but can be installed into the container when it is running using
+- In **Ports**, please open ports **8888, 8787, and 8786**.  Name port 8888 `jupyter` so Brev can treat it as a jupyterlab based instance and provide an **Open Notebook** button
+- Git is not installed in this container, but can be installed into the container when it is running using
 ```
 apt update
 apt install git -y
 ```
 
-Of course, if all you want is to install additional packages, it is easiest to just use the [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/4kr01um)  and install your additional software from there!
+Of course, if all you want is to install additional packages, it is easiest to just use the [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DzqANc)  and install your additional software from there!
 
 ## Deploy on a CUDA compatible GPU system (knowledgeable users only)
 
-Some people wmay want to have this expereince off of Brev and take it with you.  Great!  Here's a (somewhat) easy way how!  
+Some people may want to have this experience off of Brev and take it with you.  Great!  Here's a (somewhat) easy way how!  
 
-If you are provisioning this on a non-brev cloud instance, workstation, or local machine, please follow the steps below:
+If you are provisioning this on a non-Brev cloud instance, workstation, or local machine, please follow the steps below:
 
 ### 1. Provision a System Meeting These Requirements
 All provisioned systems need to be RAPIDS capable. Here's what is required:
