@@ -32,8 +32,8 @@ For those who are new to doing basic analysis for single cell data, the end to e
 
 | Notebook         | Description |Min GPU Size /<br>Instance |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--|
-| [01_demo_gpu_e2e](01_demo_gpu_e2e.ipynb)   | End to end workflow, where we understand the cells, run ETL on the data set then visiualize and explore the resiults. <br>This tutorial is good for all users | 24GB /<br>Standard RSC Instance | 
-| [02_decoupler](02_decoupler.ipynb)   | This notebook continues from the outputs of [01_demo_gpu_e2e](01_demo_gpu_e2e.ipynb) as an overview of methods that <br>can be used to investigate transcriptional regulation | 24GB /<br>Standard RSC Instance |
+| [01_demo_gpu_e2e](01_demo_gpu_e2e.ipynb)   | End to end workflow, where we understand the cells, run ETL on the data set then visiualize and explore the results. <br>This tutorial is good for all users | 24GB /<br>Standard RSC Instance | 
+| [02_decoupler](02_decoupler.ipynb)   | This notebook continues from the outputs of [01_demo_gpu_e2e](01_demo_gpu_e2e.ipynb) as an overview of methods that can be used to investigate transcriptional regulation | 24GB /<br>Standard RSC Instance |
 | [demo_gpu_e2e_with_PR](demo_gpu_e2e_with_PR.ipynb)  | End to end workflow, like [01_demo_gpu_e2e](01_demo_gpu_e2e.ipynb), but uses pearson residuals for normalization. | 24GB /<br>Standard RSC Instance |
 | [spatial_autocorr](spatial_autocorr.ipynb) | An introduction to spatial transcriptomics analysis and visualization | 24GB / Standard RSC Instance |
 | [out-of-core_processing](out-of-core_processing.ipynb) | In this notebook, we show the scalability of the analysis toof up to 11M cells easily by using Dask.<br>**Requires a 48GB GPU** | 48GB /<br>Standard RSC Instance |
