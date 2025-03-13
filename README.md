@@ -19,7 +19,7 @@ If you like these notebooks and this GPU accelerated capability, and want to sup
 ---
 
 
-This repository contains a diverse set of notebooks to help get anyone started using RAPIDS-singlecell. 
+This repository contains a diverse set of notebooks to help get anyone started using RAPIDS-singlecell developed by scverse. 
 
 
 
@@ -145,7 +145,7 @@ docker run --gpus all --pull always --rm -it \
 **Note:** The volume is currently assuming that you cloned the `single-cell-analysis-blueprint` repository into your `HOME` folder (`~/single-cell-analysis-blueprint`).  If you did not clone it there, please change the `~/single-cell-analysis-blueprint` portion of the above to the correct path before running the command.
 
 
-### 4. Install the Extra RAPIDS Singlecell Libraries into the Running Container
+### 4. Install the Extra RAPIDS-singlecell Libraries into the Running Container
 Once the container is running, 
 - if the provisioned system is an external cloud or workstation, please use a web browser to navigate to the system's IP address and it's port 8888.  Example `http://192.168.1.2:8888`
 - if the provisioned system is your sustem, then use `http://127.0.0.1:8888`.
@@ -156,8 +156,8 @@ cd /home/rapids/notebooks/single-cell-analysis-blueprint
 pip install -r requirements.txt
 ```
 
-For additional information on RAPIDS Singlecell please visit the [RAPIDS Singlecell Docs](https://rapids-singlecell.readthedocs.io/)
-For alternate installation instructions, please refer to the [RAPIDS Singlecell Install Guide](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html) to install using [pip](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#pypi), [Conda](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#conda), or [Docker](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#docker)
+For additional information on RAPIDS-singlecell please visit the [RAPIDS-singlecell Docs](https://rapids-singlecell.readthedocs.io/)
+For alternate installation instructions, please refer to the [RAPIDS-singlecell Install Guide](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html) to install using [pip](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#pypi), [Conda](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#conda), or [Docker](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#docker)
 
 ## Tips and Tricks
 1. If after clicking a "Healthy" Port 8888 link in `Deploy with Brev: Step 4`, JupyterLab does not start, or the notebooks don't show, please try again in a few seconds.  There is a known issue where there system needs a minute or two Also, sometimes, the page needs to be refreshed to update the status.
