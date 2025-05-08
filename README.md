@@ -71,7 +71,7 @@ The goal of this repository is to make it easy to try GPU-accelerated single-cel
 Follow our [Quickstart Instructions](#quick-start) above.
 
 ### Create a custom instance using Brev (knowledgeable users only)
-If you want to try a compute environment on Brev that's different from the ones provided in the Quickstart Launchables, you will need to create a new Launchable or Standalone Compute Instance. This will let you select your desired cloud provider and desired compute resource. Note, we have not tested this on every combination of cloud provider and instance type, so your experience may vary.
+If you want to try a compute environment on Brev that's not one of the Quickstart Launchables, you will need to create a new Launchable or Standalone Compute Instance. This will let you select your desired cloud provider and desired compute resource. Note, we have not tested this on every combination of cloud provider and instance type, so your experience may vary.
 
 If you're interested in trying this out, please follow the instructions here: [Setting up your Custom Brev Launchable](docs/creating_custom_brev.md)
 
