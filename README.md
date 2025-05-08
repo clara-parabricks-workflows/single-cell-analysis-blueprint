@@ -66,12 +66,14 @@ You can find more detail on each notebook in the [Notebooks README](notebooks/RE
 
 ## Deploying this Repository
 
+The goal of this repository is to make it easy to try GPU-accelerated single-cell analysis workflows on different compute environments and datasets. Our preferred environment is NVIDIA Brev, but you can also run these in your own GPU-connected environment. We've provided a few tutorials below on how to set this up, and the easiest place to start is to follow the Quickstart instructions.
+
 ### Using our Brev Launchable (super easy mode - highly recommended)
 
 Follow our [Quickstart Instructions](#quick-start) above.
 
-### Create a custom instance using Brev Launchables (knowledgeable users only)
-If using Brev to create a new Launchable or Standalone Compute Instance, so that you can use your desired cloud provider and select your desired compute resource. Note, we have not tested this on every combination of cloud provider and instance type, so your experience may vary.
+### Create a custom instance using Brev (knowledgeable users only)
+If you want to try a compute environment on Brev that's different from the ones provided in the Quickstart Launchables, you will need to create a new Launchable or Standalone Compute Instance. This will let you select your desired cloud provider and desired compute resource. Note, we have not tested this on every combination of cloud provider and instance type, so your experience may vary.
 
 If you're interested in trying this out, please follow the instructions here: [Setting up your Custom Brev Launchable](docs/creating_custom_brev.md)
 
