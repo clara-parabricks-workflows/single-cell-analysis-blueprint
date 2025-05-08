@@ -3,7 +3,7 @@ The goal of this guide is to walk through the steps to create a custom GPU insta
 
 Note, Brev provides access to a wide variety of GPU instances on difference cloud environment. This provides flexibility on pricing and avaiablity, but it means that we cannot test this launchable on every combination of compute environment and cloud environment. As such, some tinkering may be required to get the instance to work on the specific configuration you select. If you want a tested environment that is tested to work, please follow the [Quickstart Instructions](../README.md#quick-start). 
 
-> [!WARN]  
+> [!WARNING]  
 > The Docker Compose YAML files in this repository are known not to work on GCP resources on Brev. We are investigating, but recommend using another cloud provider for now.
 
 ## Option 1 - Create a custom instance using the Brev Launchable Creator
