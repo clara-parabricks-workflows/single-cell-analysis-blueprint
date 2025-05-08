@@ -2,7 +2,7 @@
 
 
 
-### **Notebook 01_scRNA_analysis_preprocessing.ipynb : Basic Demo Workflow**
+### **Notebook 01_scRNA_analysis_preprocessing.ipynb: Basic Demo Workflow**
 
 By the completion of this notebook, a user will be able to do the following:
 
@@ -43,23 +43,17 @@ By the completion of this notebook, a user will be able to do the following:
     - Trajectory analysis
         - Implement a diffusion map to understand the progress of cell types
 
-### **Notebook 02_decoupler - Decoupler-GPU: Accelerated Transcriptional Regulatory Analysis**
+### **Notebook 02_scRNA_analysis_extended.ipynb - Decoupler-GPU: Accelerated Transcriptional Regulatory Analysis**
 
 This is an overview of methods that can be used to investigate transcriptional regulation. Although the tutorial does not dive deeply into these models, the notebook is used to reflect a difference in speed that is benefitted by GPU.
 
-### **Notebook demo_gpu_e2e_with_PR - A different way to normalize with Pearson Residuals**
+### **Notebook 03_scRNA_analysis_with_pearson_residuals.ipynb - A different way to normalize with Pearson Residuals**
 
 By the completion of this notebook, a user will be able to remove unwanted sources of variation using Pearson Residuals to normalize. This is a different approach to analysis from Notebook 01. After filtering, we introduce a normalization step toa address the potential issues in how we previously removed unwanted sources of variation.
 
-### **Notebook spatial_autocorr - Visualizing and investigating spatial transcriptomics data**
 
-By the completion of this notebook, a user will be able to do the following:
-- Compute spatial autocorrelation, which represents how gene expression levels are spatially distributed across tissue sections.
-- Use Squidpy to compute a graph on the coordinates
-- Compute two metrics using Moran's I (better for global structures) and Geary's C (better for local structures)
-- Explore the results visually by plotting the expression of genes Mbp (myelin-associated) and Nrgn (neuronal marker)
 
-### **Notebook out-of-core_processing - Scale analysis to 11M cells easily and quickly leveraging Dask**
+### **Notebook 04_scRNA_analysis_dask_out_of_core.ipynb - Scale analysis to 11M cells easily and quickly leveraging Dask**
 
 By the completion of this notebook, a user will be able to do the following:
 - Create a local DASK cluster
@@ -69,17 +63,25 @@ By the completion of this notebook, a user will be able to do the following:
 - Scale gene expression
 - Compute PCA using GPU acceleration
 
-### **Notebook multi_gpu_large_data_showcase - Multi-GPU showcase using persist**
+### **Notebook 05_scRNA_analysis_multi_GPU.ipynb - Multi-GPU showcase using persist**
 
 By the completion of this notebook, a user will be able to perform the same steps as Notebook 05, but with the following:
 - Process massive single-cell datasets without exceeding memory limits
 - Fully utilize all available GPUs, scaling performance across multiple devices
 - Enable chunk-based execution, efficiently managing memory by loading only necessary data
 
-### **Notebook demo_gpu-seuratv3 - End to end example on Brain Cells**
+### **Notebook 06_scRNA_analysis_90k_brain_example.ipynb - End to end example on Brain Cells**
 
 By the completion of this noteobok, a user will be able to perform similar steps to Notebook 01 (end to end demo) but on brain cells.
 
-### **Notebook demo_gpu-seuratv3-brain-1M - End to end example on 1M Brain Cells**
+### **Notebook 07_scRNA_analysis_1.3M_brain_example.ipynb - End to end example on 1M Brain Cells**
 
 By the completion of this noteobok, a user will be able to perform similar steps to demo_gpu-seuratv3 but on 1M brain cells.
+
+### **Notebook 08_spatial_analysis_autocorrelation.ipynb - Visualizing and investigating spatial transcriptomics data**
+
+By the completion of this notebook, a user will be able to do the following:
+- Compute spatial autocorrelation, which represents how gene expression levels are spatially distributed across tissue sections.
+- Use Squidpy to compute a graph on the coordinates
+- Compute two metrics using Moran's I (better for global structures) and Geary's C (better for local structures)
+- Explore the results visually by plotting the expression of genes Mbp (myelin-associated) and Nrgn (neuronal marker)

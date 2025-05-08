@@ -17,7 +17,7 @@ Please click this button to deploy this Repo using Brev.dev's Launchables
 
 1. Select your resource size:  
   * For a **Standard Instance** (L40s), click here: [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DzqANc)  
-  * For a **Large Instance** (8x H100),click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DwSxoU).
+  * For a **Large Instance** (8x H100), click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DwSxoU)
 
 2. Click **Deploy Launchable** on the Brev.dev Launchable page
 
@@ -36,8 +36,6 @@ Please click this button to deploy this Repo using Brev.dev's Launchables
 
 
 You should drop into a fully installed and populated JupyterLab environment.  Open up your desired notebook from the list below, and have a great time!
-
-
 
 ## Overview
 
