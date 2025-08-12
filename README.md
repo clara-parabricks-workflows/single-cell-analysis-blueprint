@@ -4,6 +4,4 @@
 
 ---
 
-
-
-This repository has been moved to https://github.com/NVIDIA-AI-Blueprints/single-cell-analysis-blueprint/tree/main.
+This repository has been moved. Please access the latest single cell blueprint related github repository at https://build.nvidia.com/nvidia/single-cell-analysis .
