@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   run-notebook:
-    runs-on: arc-runners-org-nvidia-ai-bp-4-gpu
+    runs-on: arc-runner-set-oke-org-poc-4-gpu
     environment: dev
     strategy:
       matrix:
