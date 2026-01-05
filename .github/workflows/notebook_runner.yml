@@ -565,16 +565,14 @@ jobs:
               fi
           done
 
-          pip install ipykernel nbclient nbformat jupyter nbconvert pytest-html pytest-cov
+          pip install ipykernel nbclient nbformat jupyter nbconvert pytest-html pytest-cov papermill
           python3 -m ipykernel install --user --name python3 --display-name "Python 3"
 
           echo '=== Verifying installations ==='
-          pip list | grep -i papermill
+          pip list | grep -i papermill || { echo "ERROR: papermill not found in pip list"; exit 1; }
           
           echo '=== Verifying papermill command ==='
-          which papermill || echo "papermill not in PATH, checking pip show..."
-          pip show papermill
-          python -m papermill --version
+          python -m papermill --version || { echo "ERROR: papermill command failed"; exit 1; }
           
           echo '=== Verifying kernel ==='
           jupyter kernelspec list
