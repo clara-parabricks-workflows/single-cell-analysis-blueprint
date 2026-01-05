@@ -614,10 +614,15 @@ jobs:
           export PYTHONUNBUFFERED=1
           
           # UCX/CUDA environment variables to prevent GPU context issues and segfaults
+          # Option E: Most comprehensive - combines aggressive UCX tuning + synchronous CUDA operations
           # NOTE: Do NOT set CUDA_VISIBLE_DEVICES here - it conflicts with cached GPU device list
-          export UCX_TLS=tcp,cuda_copy,cuda_ipc
-          export UCX_MEMTYPE_CACHE=n
-          export RAPIDS_NO_INITIALIZE=1
+          export UCX_TLS=tcp,cuda_copy                    # Only TCP + CUDA copy (no cuda_ipc to avoid context issues)
+          export UCX_MEMTYPE_CACHE=n                      # Disable memory type cache
+          export UCX_RNDV_SCHEME=put_zcopy                # Use zero-copy rendezvous scheme
+          export UCX_CUDA_COPY_MAX_REG_RATIO=0            # Disable CUDA copy registration
+          export UCXPY_NON_BLOCKING_MODE=1                # Non-blocking mode for UCX-Py
+          export RAPIDS_NO_INITIALIZE=1                   # Delay RAPIDS initialization
+          export CUDA_LAUNCH_BLOCKING=1                   # Force synchronous CUDA kernel execution
           
           echo "╔══════════════════════════════════════════════════════════════════╗"
           echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
@@ -627,7 +632,11 @@ jobs:
           echo "=== [1/6] UCX/CUDA Environment Variables ==="
           echo "UCX_TLS=\$UCX_TLS"
           echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
+          echo "UCX_RNDV_SCHEME=\$UCX_RNDV_SCHEME"
+          echo "UCX_CUDA_COPY_MAX_REG_RATIO=\$UCX_CUDA_COPY_MAX_REG_RATIO"
+          echo "UCXPY_NON_BLOCKING_MODE=\$UCXPY_NON_BLOCKING_MODE"
           echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
+          echo "CUDA_LAUNCH_BLOCKING=\$CUDA_LAUNCH_BLOCKING"
           echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
           echo "LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:-not set}"
           
