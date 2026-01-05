@@ -614,21 +614,50 @@ jobs:
           export PYTHONUNBUFFERED=1
           
           # UCX/CUDA environment variables to prevent GPU context issues and segfaults
+          # NOTE: Do NOT set CUDA_VISIBLE_DEVICES here - it conflicts with cached GPU device list
           export UCX_TLS=tcp,cuda_copy,cuda_ipc
           export UCX_MEMTYPE_CACHE=n
           export RAPIDS_NO_INITIALIZE=1
-          export CUDA_VISIBLE_DEVICES=0
           
-          echo "=== UCX/CUDA Environment Variables ==="
+          echo "╔══════════════════════════════════════════════════════════════════╗"
+          echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
+          echo "╚══════════════════════════════════════════════════════════════════╝"
+          
+          echo ""
+          echo "=== [1/6] UCX/CUDA Environment Variables ==="
           echo "UCX_TLS=\$UCX_TLS"
           echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
           echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
-          echo "CUDA_VISIBLE_DEVICES=\$CUDA_VISIBLE_DEVICES"
-          echo "======================================="
-
-          echo "=============== GPU Status BEFORE Notebook Execution ==============="
-          nvidia-smi --query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu --format=csv
-          echo "===================================================================="
+          echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
+          echo "LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:-not set}"
+          
+          echo ""
+          echo "=== [2/6] Python Package Versions ==="
+          pip list 2>/dev/null | grep -iE "cudf|cupy|numba|rapids|cugraph|rmm" || echo "Package query failed"
+          
+          echo ""
+          echo "=== [3/6] CUDA Device Detection ==="
+          python3 -c "import os; print('CUDA_VISIBLE_DEVICES:', os.environ.get('CUDA_VISIBLE_DEVICES', 'not set'))"
+          python3 -c "import cupy as cp; print('CuPy GPU count:', cp.cuda.runtime.getDeviceCount())" 2>/dev/null || echo "CuPy GPU detection failed"
+          python3 -c "from numba import cuda; print('Numba GPU count:', len(cuda.gpus)); [print('  GPU', i, ':', g.name) for i,g in enumerate(cuda.gpus)]" 2>/dev/null || echo "Numba GPU detection failed"
+          
+          echo ""
+          echo "=== [4/6] nvidia-smi GPU Status ==="
+          nvidia-smi --query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu,temperature.gpu --format=csv
+          
+          echo ""
+          echo "=== [5/6] GPU Process Check ==="
+          nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv 2>/dev/null || echo "No GPU processes running"
+          
+          echo ""
+          echo "=== [6/6] UCX Info ==="
+          ucx_info -v 2>/dev/null | head -5 || echo "ucx_info not available"
+          
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════════╗"
+          echo "║           Starting Notebook Execution                            ║"
+          echo "╚══════════════════════════════════════════════════════════════════╝"
+          echo ""
 
           python -m papermill "${NOTEBOOK_RELATIVED_DIR}/${NOTEBOOK_FILENAME}" "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK}" \
             --log-output \
