@@ -43,7 +43,7 @@ jobs:
             "06_scRNA_analysis_90k_brain_example.ipynb",
             "07_scRNA_analysis_1.3M_brain_example.ipynb"
           ]
-      max-parallel: 4
+      max-parallel: 1  # Reduced from 4 to avoid GPU resource conflicts and UCX/CUDA context issues
       fail-fast: false
 
     env:
@@ -612,6 +612,19 @@ jobs:
           docker compose -f "$DOCKER_COMPOSE_FILE" exec -u root backend bash <<EOF
           set -euxo pipefail
           export PYTHONUNBUFFERED=1
+          
+          # UCX/CUDA environment variables to prevent GPU context issues and segfaults
+          export UCX_TLS=tcp,cuda_copy,cuda_ipc
+          export UCX_MEMTYPE_CACHE=n
+          export RAPIDS_NO_INITIALIZE=1
+          export CUDA_VISIBLE_DEVICES=0
+          
+          echo "=== UCX/CUDA Environment Variables ==="
+          echo "UCX_TLS=\$UCX_TLS"
+          echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
+          echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
+          echo "CUDA_VISIBLE_DEVICES=\$CUDA_VISIBLE_DEVICES"
+          echo "======================================="
 
           echo "=============== GPU Status BEFORE Notebook Execution ==============="
           nvidia-smi --query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu --format=csv
