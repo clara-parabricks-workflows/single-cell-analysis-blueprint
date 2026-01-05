@@ -103,7 +103,7 @@ jobs:
           
           # Install basic utilities
           echo "📦 Installing basic utilities..."
-          sudo apt-get install -y wget curl git build-essential jq libxml2-utils
+          sudo apt-get install -y wget curl git build-essential jq libxml2-utils ca-certificates gnupg
           
           # Install Docker and Docker Compose
           echo "🐳 Installing Docker and Docker Compose..."
@@ -114,7 +114,28 @@ jobs:
           else
             echo "Docker already installed, skipping..."
           fi
-          sudo apt-get install -y docker-compose-plugin docker-compose
+          
+          # Add Docker's official GPG key and repository for docker-compose-plugin
+          if ! docker compose version &> /dev/null; then
+            echo "Installing docker-compose-plugin from Docker official repository..."
+            sudo install -m 0755 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg --yes
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+              $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install -y docker-compose-plugin
+          else
+            echo "Docker Compose plugin already installed, skipping..."
+          fi
+          
+          # Install standalone docker-compose as fallback
+          if ! command -v docker-compose &> /dev/null; then
+            echo "Installing standalone docker-compose..."
+            sudo apt-get install -y docker-compose || true
+          fi
           
           # Ensure docker service is running
           sudo systemctl start docker || true
