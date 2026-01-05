@@ -614,42 +614,55 @@ jobs:
           export PYTHONUNBUFFERED=1
           
           # ============================================================================
-          # Option H: Most comprehensive - F (disable UCX GPU) + G (CUDA pre-init)
+          # Option I: FINAL SOLUTION - Disable Dask distributed entirely
           # ============================================================================
-          # NOTE: Do NOT set CUDA_VISIBLE_DEVICES here - it conflicts with cached GPU device list
+          # Root cause: raft_dask/UCX crashes during cuCtxGetDevice_v2 regardless of env vars
+          # Solution: Force synchronous single-threaded execution, bypass all distributed code
           
-          # Part 1: Completely disable UCX GPU communication, force pure TCP
+          # 1. Disable Dask distributed scheduler - use synchronous execution
+          export DASK_SCHEDULER=synchronous
+          export DASK_DISTRIBUTED__SCHEDULER__ALLOWED_FAILURES=0
+          
+          # 2. Disable UCX completely
+          export UCX_TLS=tcp
+          export UCX_MEMTYPE_CACHE=n
+          export UCX_NET_DEVICES=all
           export DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=tcp
           export DASK_UCX__TCP=true
           export DASK_UCX__INFINIBAND=false
           export DASK_UCX__NVLINK=false
           export DASK_UCX__CUDA_COPY=false
-          export UCX_TLS=tcp                              # Pure TCP only, no GPU transports
-          export UCX_MEMTYPE_CACHE=n                      # Disable memory type cache
-          export CUDA_LAUNCH_BLOCKING=1                   # Force synchronous CUDA kernel execution
-          export RAPIDS_NO_INITIALIZE=1                   # Delay RAPIDS initialization
+          export DASK_UCX__RDMACM=false
           
-          # Part 2: Pre-initialize CUDA context on all GPUs before any UCX/Dask operations
-          echo "=== [0/6] Pre-initializing CUDA contexts on all GPUs ==="
-          python3 -c "import cupy as cp; gpu_count = cp.cuda.runtime.getDeviceCount(); print('Detected', gpu_count, 'GPUs'); [cp.cuda.Device(i).use() or cp.zeros(1) or cp.cuda.runtime.deviceSynchronize() or print('  GPU', i, 'initialized') for i in range(gpu_count)]; print('All GPU contexts initialized')" 2>/dev/null || echo "CUDA pre-init skipped (cupy not available yet)"
+          # 3. Force single-GPU mode for cuGraph/raft operations
+          export RAPIDS_NO_INITIALIZE=1
+          export CUDA_LAUNCH_BLOCKING=1
+          export RAFT_ENABLE_UCX=0
+          
+          # 4. Limit Dask worker resources
+          export DASK_DISTRIBUTED__WORKER__NTHREADS=1
+          export DASK_DISTRIBUTED__WORKER__MEMORY__TARGET=0.6
+          export DASK_DISTRIBUTED__WORKER__MEMORY__SPILL=0.7
+          export DASK_DISTRIBUTED__WORKER__MEMORY__PAUSE=0.8
+          export DASK_DISTRIBUTED__WORKER__MEMORY__TERMINATE=0.95
           
           echo "╔══════════════════════════════════════════════════════════════════╗"
           echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
           echo "╚══════════════════════════════════════════════════════════════════╝"
           
           echo ""
-          echo "=== [1/6] UCX/CUDA/Dask Environment Variables ==="
-          echo "DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=\$DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME"
-          echo "DASK_UCX__TCP=\$DASK_UCX__TCP"
-          echo "DASK_UCX__INFINIBAND=\$DASK_UCX__INFINIBAND"
-          echo "DASK_UCX__NVLINK=\$DASK_UCX__NVLINK"
-          echo "DASK_UCX__CUDA_COPY=\$DASK_UCX__CUDA_COPY"
+          echo "=== [1/6] Dask/UCX/CUDA Environment Variables ==="
+          echo "--- Dask Scheduler ---"
+          echo "DASK_SCHEDULER=\$DASK_SCHEDULER"
+          echo "DASK_DISTRIBUTED__WORKER__NTHREADS=\$DASK_DISTRIBUTED__WORKER__NTHREADS"
+          echo "--- UCX Settings ---"
           echo "UCX_TLS=\$UCX_TLS"
           echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
-          echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
+          echo "RAFT_ENABLE_UCX=\$RAFT_ENABLE_UCX"
+          echo "--- CUDA Settings ---"
           echo "CUDA_LAUNCH_BLOCKING=\$CUDA_LAUNCH_BLOCKING"
+          echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
           echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
-          echo "LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:-not set}"
           
           echo ""
           echo "=== [2/6] Python Package Versions ==="
