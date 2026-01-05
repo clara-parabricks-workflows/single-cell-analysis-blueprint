@@ -631,21 +631,7 @@ jobs:
           
           # Part 2: Pre-initialize CUDA context on all GPUs before any UCX/Dask operations
           echo "=== [0/6] Pre-initializing CUDA contexts on all GPUs ==="
-          python3 -c "
-import cupy as cp
-import sys
-try:
-    gpu_count = cp.cuda.runtime.getDeviceCount()
-    print('Detected', gpu_count, 'GPUs, initializing contexts...')
-    for i in range(gpu_count):
-        with cp.cuda.Device(i):
-            _ = cp.zeros(1)
-            cp.cuda.runtime.deviceSynchronize()
-            print('  GPU', i, ': Context initialized successfully')
-    print('All GPU contexts initialized successfully')
-except Exception as e:
-    print('WARNING: CUDA pre-initialization failed:', e, file=sys.stderr)
-"
+          python3 -c "import cupy as cp; gpu_count = cp.cuda.runtime.getDeviceCount(); print('Detected', gpu_count, 'GPUs'); [cp.cuda.Device(i).use() or cp.zeros(1) or cp.cuda.runtime.deviceSynchronize() or print('  GPU', i, 'initialized') for i in range(gpu_count)]; print('All GPU contexts initialized')" 2>/dev/null || echo "CUDA pre-init skipped (cupy not available yet)"
           
           echo "╔══════════════════════════════════════════════════════════════════╗"
           echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
