@@ -671,10 +671,29 @@ jobs:
           nvidia-smi 2>/dev/null || echo "WARNING: Full nvidia-smi failed"
           echo "===================================================================="
 
+          # Convert executed notebook to HTML
+          echo "=============== Converting Notebook to HTML ==============="
+          if [ -f "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK}" ]; then
+              echo "Converting ${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK} to HTML..."
+              jupyter nbconvert --to html "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK}" --output "${OUTPUT_NOTEBOOK_HTML}" --output-dir "${DOCKER_WRITEABLE_DIR}" 2>&1 || {
+                  echo "ERROR: nbconvert failed, trying alternative method..."
+                  python -m nbconvert --to html "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK}" --output "${OUTPUT_NOTEBOOK_HTML}" --output-dir "${DOCKER_WRITEABLE_DIR}" 2>&1 || {
+                      echo "ERROR: Both nbconvert methods failed!"
+                      ls -la "${DOCKER_WRITEABLE_DIR}/"
+                  }
+              }
+          else
+              echo "ERROR: Executed notebook not found at ${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK}"
+              ls -la "${DOCKER_WRITEABLE_DIR}/"
+          fi
+          echo "============================================================"
+
           if [ -s "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK_HTML}" ]; then
               echo "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK_HTML} exists and has contents"
           else
               echo "${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK_HTML} does NOT exist or has NO contents"
+              echo "Available files in ${DOCKER_WRITEABLE_DIR}:"
+              ls -la "${DOCKER_WRITEABLE_DIR}/"
               exit 1
           fi
 
