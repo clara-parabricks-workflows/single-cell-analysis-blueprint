@@ -88,21 +88,261 @@ jobs:
       - name: Checkout BP repository
         uses: actions/checkout@v4
 
-      - name: Verify Token Access
+      # ============================================================
+      # PRE-INSTALL: Install all required software and tools
+      # ============================================================
+      - name: Pre-Install - Install all required software and tools
+        id: pre-install
         run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer ${{ secrets.BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/NVIDIA-AI-Blueprints/blueprint-github-test")
+          echo "=========================================="
+          echo "🔧 PRE-INSTALL: Installing all required software and tools"
+          echo "=========================================="
+          
+          # Update package lists
+          sudo apt-get update
+          
+          # Install basic utilities
+          echo "📦 Installing basic utilities..."
+          sudo apt-get install -y wget curl git build-essential jq libxml2-utils
+          
+          # Install Docker and Docker Compose
+          echo "🐳 Installing Docker and Docker Compose..."
+          if ! command -v docker &> /dev/null; then
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            rm -f get-docker.sh
+          else
+            echo "Docker already installed, skipping..."
+          fi
+          sudo apt-get install -y docker-compose-plugin docker-compose
+          
+          # Ensure docker service is running
+          sudo systemctl start docker || true
+          sudo usermod -aG docker $USER || true
+          
+          echo ""
+          echo "✅ Verifying installations..."
+          echo "-------------------------------------------"
+          echo "Docker:         $(docker --version)"
+          echo "Docker Compose: $(docker compose version)"
+          echo "Git:            $(git --version)"
+          echo "Curl:           $(curl --version | head -1)"
+          echo "Wget:           $(wget --version | head -1)"
+          echo "Jq:             $(jq --version)"
+          echo "-------------------------------------------"
+          
+          echo ""
+          echo "=========================================="
+          echo "✅ PRE-INSTALL: All software installed successfully"
+          echo "=========================================="
 
-          if [ "$RESPONSE" = "200" ]; then
-            echo "✓ Repository accessible"
-          elif [ "$RESPONSE" = "404" ]; then
-            echo "✗ Repository not found (check name/visibility)"
+      # ============================================================
+      # PRE-CHECK: Validate all prerequisites before execution
+      # ============================================================
+      - name: Pre-Check - Validate all prerequisites
+        id: pre-check
+        run: |
+          echo "=========================================="
+          echo "🔍 PRE-CHECK: Validating all prerequisites"
+          echo "=========================================="
+          
+          ERRORS=0
+          WARNINGS=0
+          
+          # ===== Check installed software =====
+          echo ""
+          echo "📋 [1/5] Checking installed software..."
+          echo "-------------------------------------------"
+          
+          for cmd in docker git curl wget jq; do
+            if command -v $cmd &> /dev/null; then
+              echo "  ✅ $cmd is available"
+            else
+              echo "  ❌ $cmd is NOT available"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          
+          # Check Docker Compose
+          if docker compose version &> /dev/null; then
+            echo "  ✅ docker compose is available"
+          else
+            echo "  ❌ docker compose is NOT available"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Check Docker daemon is running
+          if docker info &> /dev/null; then
+            echo "  ✅ Docker daemon is running"
+          else
+            echo "  ❌ Docker daemon is NOT running"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # ===== Check secrets/tokens =====
+          echo ""
+          echo "🔑 [2/5] Checking secrets and tokens..."
+          echo "-------------------------------------------"
+          
+          # Check BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH
+          if [ -n "${{ secrets.BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH }}" ]; then
+            echo "  ✅ BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH is set"
+            
+            # Validate token access to repository
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/NVIDIA-AI-Blueprints/blueprint-github-test")
+            
+            if [ "$RESPONSE" = "200" ]; then
+              echo "  ✅ Token has valid access to NVIDIA-AI-Blueprints/blueprint-github-test"
+            elif [ "$RESPONSE" = "404" ]; then
+              echo "  ❌ Repository not found or token lacks access (HTTP 404)"
+              ERRORS=$((ERRORS + 1))
+            elif [ "$RESPONSE" = "401" ]; then
+              echo "  ❌ Token is invalid or expired (HTTP 401)"
+              ERRORS=$((ERRORS + 1))
+            elif [ "$RESPONSE" = "403" ]; then
+              echo "  ❌ Token lacks required permissions (HTTP 403)"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ⚠️ Unexpected response: HTTP $RESPONSE"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          else
+            echo "  ❌ BLUEPRINT_GITHUB_TEST_TOKEN_ON_GH is NOT set"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Check NGC_API_KEY
+          if [ -n "${{ secrets.NGC_API_KEY }}" ]; then
+            echo "  ✅ NGC_API_KEY is set"
+          else
+            echo "  ⚠️ NGC_API_KEY is NOT set (may be required for private NGC images)"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # Check GITHUB_TOKEN
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "  ✅ GITHUB_TOKEN is available"
+          else
+            echo "  ⚠️ GITHUB_TOKEN is NOT available"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # ===== Check external URLs accessibility =====
+          echo ""
+          echo "🌐 [3/5] Checking external URLs accessibility..."
+          echo "-------------------------------------------"
+          
+          # GitHub API
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 "https://api.github.com")
+          if [[ "$HTTP_CODE" =~ ^2 ]]; then
+            echo "  ✅ GitHub API (api.github.com) is accessible"
+          else
+            echo "  ❌ GitHub API (api.github.com) is NOT accessible (HTTP $HTTP_CODE)"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Docker registry (nvcr.io)
+          DOCKER_REGISTRY="nvcr.io"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 "https://${DOCKER_REGISTRY}/v2/")
+          if [[ "$HTTP_CODE" =~ ^(2|4) ]]; then
+            echo "  ✅ Docker registry (${DOCKER_REGISTRY}) is accessible"
+          else
+            echo "  ⚠️ Docker registry (${DOCKER_REGISTRY}) may have issues (HTTP $HTTP_CODE)"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # Poetry install URL
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 "https://install.python-poetry.org")
+          if [[ "$HTTP_CODE" =~ ^2 ]]; then
+            echo "  ✅ Poetry install URL is accessible"
+          else
+            echo "  ⚠️ Poetry install URL may not be accessible (HTTP $HTTP_CODE) - fallback to pip available"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # Docker install script
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 "https://get.docker.com")
+          if [[ "$HTTP_CODE" =~ ^2 ]]; then
+            echo "  ✅ Docker install script (get.docker.com) is accessible"
+          else
+            echo "  ⚠️ Docker install script may not be accessible (HTTP $HTTP_CODE)"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # ===== Check required files =====
+          echo ""
+          echo "📁 [4/5] Checking required files..."
+          echo "-------------------------------------------"
+          
+          # Check Docker Compose file
+          if [ -f "${{ env.DOCKER_COMPOSE_FILE }}" ]; then
+            echo "  ✅ Docker Compose file exists: ${{ env.DOCKER_COMPOSE_FILE }}"
+          else
+            echo "  ❌ Docker Compose file NOT found: ${{ env.DOCKER_COMPOSE_FILE }}"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Check notebook file
+          NOTEBOOK_PATH="${{ env.NOTEBOOK_RELATIVED_DIR }}/${{ matrix.NOTEBOOK_FILENAME }}"
+          if [ -f "$NOTEBOOK_PATH" ]; then
+            echo "  ✅ Notebook file exists: $NOTEBOOK_PATH"
+          else
+            echo "  ❌ Notebook file NOT found: $NOTEBOOK_PATH"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Check requirements.txt
+          if [ -f "requirements.txt" ]; then
+            echo "  ✅ requirements.txt exists"
+          else
+            echo "  ⚠️ requirements.txt NOT found (may cause issues in container)"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # ===== Check custom actions =====
+          echo ""
+          echo "🎬 [5/5] Checking custom actions..."
+          echo "-------------------------------------------"
+          
+          if [ -d ".github/actions/setup-env" ]; then
+            echo "  ✅ Custom action .github/actions/setup-env exists"
+          else
+            echo "  ❌ Custom action .github/actions/setup-env NOT found"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          if [ -d ".github/actions/check-sysinfo" ]; then
+            echo "  ✅ Custom action .github/actions/check-sysinfo exists"
+          else
+            echo "  ❌ Custom action .github/actions/check-sysinfo NOT found"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # ===== Final result =====
+          echo ""
+          echo "=========================================="
+          echo "📊 PRE-CHECK SUMMARY"
+          echo "-------------------------------------------"
+          echo "  Errors:   $ERRORS"
+          echo "  Warnings: $WARNINGS"
+          echo "=========================================="
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo ""
+            echo "❌ PRE-CHECK FAILED: $ERRORS error(s) detected"
+            echo "Please fix the above errors before proceeding."
+            echo "=========================================="
             exit 1
           else
-            echo "✗ Unexpected response: $RESPONSE"
-            exit 1
+            echo ""
+            echo "✅ PRE-CHECK PASSED: All critical prerequisites validated"
+            if [ $WARNINGS -gt 0 ]; then
+              echo "⚠️ Note: $WARNINGS warning(s) detected - please review above"
+            fi
+            echo "=========================================="
           fi
 
       - name: Checkout Test repository
@@ -122,21 +362,18 @@ jobs:
         env:
           NGC_API_Key: ${{ secrets.NGC_API_KEY }}
         run: |
-          # Install wget
-          sudo apt-get update
-          sudo apt-get install -y wget
-
-          # Install Docker and Docker Compose in a single step
-          curl -fsSL https://get.docker.com -o get-docker.sh
-          sudo sh get-docker.sh
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin docker-compose build-essential
-          # Get System Info
+          # NOTE: Docker and tools already installed in pre-install step
+          # This step now only verifies and displays system info
+          
           echo "===================== System Info ====================="
-          more /etc/os-release
-          # nvidia-smi
+          cat /etc/os-release
+          echo ""
+          echo "===================== Docker Info ====================="
           docker version
           docker compose version
+          echo ""
+          echo "===================== GPU Info ====================="
+          nvidia-smi || echo "nvidia-smi not available (expected on non-GPU runners)"
 
       - uses: ./.github/actions/check-sysinfo
 
