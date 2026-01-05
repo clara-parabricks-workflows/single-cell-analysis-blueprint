@@ -613,28 +613,55 @@ jobs:
           set -euxo pipefail
           export PYTHONUNBUFFERED=1
           
-          # UCX/CUDA environment variables to prevent GPU context issues and segfaults
-          # Option E: Most comprehensive - combines aggressive UCX tuning + synchronous CUDA operations
+          # ============================================================================
+          # Option H: Most comprehensive - F (disable UCX GPU) + G (CUDA pre-init)
+          # ============================================================================
           # NOTE: Do NOT set CUDA_VISIBLE_DEVICES here - it conflicts with cached GPU device list
-          export UCX_TLS=tcp,cuda_copy                    # Only TCP + CUDA copy (no cuda_ipc to avoid context issues)
+          
+          # Part 1: Completely disable UCX GPU communication, force pure TCP
+          export DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=tcp
+          export DASK_UCX__TCP=true
+          export DASK_UCX__INFINIBAND=false
+          export DASK_UCX__NVLINK=false
+          export DASK_UCX__CUDA_COPY=false
+          export UCX_TLS=tcp                              # Pure TCP only, no GPU transports
           export UCX_MEMTYPE_CACHE=n                      # Disable memory type cache
-          export UCX_RNDV_SCHEME=put_zcopy                # Use zero-copy rendezvous scheme
-          export UCX_CUDA_COPY_MAX_REG_RATIO=0            # Disable CUDA copy registration
-          export UCXPY_NON_BLOCKING_MODE=1                # Non-blocking mode for UCX-Py
-          export RAPIDS_NO_INITIALIZE=1                   # Delay RAPIDS initialization
           export CUDA_LAUNCH_BLOCKING=1                   # Force synchronous CUDA kernel execution
+          export RAPIDS_NO_INITIALIZE=1                   # Delay RAPIDS initialization
+          
+          # Part 2: Pre-initialize CUDA context on all GPUs before any UCX/Dask operations
+          echo "=== [0/6] Pre-initializing CUDA contexts on all GPUs ==="
+          python3 << 'CUDAINIT'
+import cupy as cp
+import sys
+try:
+    gpu_count = cp.cuda.runtime.getDeviceCount()
+    print(f"Detected {gpu_count} GPUs, initializing contexts...")
+    for i in range(gpu_count):
+        with cp.cuda.Device(i):
+            # Allocate small array to force context creation
+            _ = cp.zeros(1)
+            cp.cuda.runtime.deviceSynchronize()
+            print(f"  GPU {i}: Context initialized successfully")
+    print("All GPU contexts initialized successfully")
+except Exception as e:
+    print(f"WARNING: CUDA pre-initialization failed: {e}", file=sys.stderr)
+    sys.exit(0)  # Don't fail, just warn
+CUDAINIT
           
           echo "╔══════════════════════════════════════════════════════════════════╗"
           echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
           echo "╚══════════════════════════════════════════════════════════════════╝"
           
           echo ""
-          echo "=== [1/6] UCX/CUDA Environment Variables ==="
+          echo "=== [1/6] UCX/CUDA/Dask Environment Variables ==="
+          echo "DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=\$DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME"
+          echo "DASK_UCX__TCP=\$DASK_UCX__TCP"
+          echo "DASK_UCX__INFINIBAND=\$DASK_UCX__INFINIBAND"
+          echo "DASK_UCX__NVLINK=\$DASK_UCX__NVLINK"
+          echo "DASK_UCX__CUDA_COPY=\$DASK_UCX__CUDA_COPY"
           echo "UCX_TLS=\$UCX_TLS"
           echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
-          echo "UCX_RNDV_SCHEME=\$UCX_RNDV_SCHEME"
-          echo "UCX_CUDA_COPY_MAX_REG_RATIO=\$UCX_CUDA_COPY_MAX_REG_RATIO"
-          echo "UCXPY_NON_BLOCKING_MODE=\$UCXPY_NON_BLOCKING_MODE"
           echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
           echo "CUDA_LAUNCH_BLOCKING=\$CUDA_LAUNCH_BLOCKING"
           echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
