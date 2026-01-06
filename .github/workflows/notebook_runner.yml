@@ -499,7 +499,54 @@ jobs:
 
           set -e
           export COMPOSE_HTTP_TIMEOUT=300
-          docker compose --verbose -f "$DOCKER_COMPOSE_FILE" up -d --wait --force-recreate
+          
+          # ============================================================================
+          # CRITICAL: Create docker-compose override to inject UCX/RAFT env vars
+          # Docker Compose doesn't inherit shell exports - must use override file
+          # ============================================================================
+          OVERRIDE_FILE="docker-compose.override.yml"
+          cat > "$OVERRIDE_FILE" << 'ENVEOF'
+version: '3.8'
+services:
+  backend:
+    environment:
+      # UCX settings - disable GPU transports
+      UCX_TLS: "tcp"
+      UCX_MEMTYPE_CACHE: "n"
+      UCX_NET_DEVICES: "all"
+      UCX_LOG_LEVEL: "error"
+      UCX_WARN_UNUSED_ENV_VARS: "n"
+      # RAFT settings - disable UCX completely
+      RAFT_USE_UCX: "0"
+      RAFT_ENABLE_UCX: "0"
+      RAFT_COMMS_UCX_ENABLED: "0"
+      # Dask settings - synchronous execution, no UCX
+      DASK_SCHEDULER: "synchronous"
+      DASK_UCX__TCP: "true"
+      DASK_UCX__INFINIBAND: "false"
+      DASK_UCX__NVLINK: "false"
+      DASK_UCX__CUDA_COPY: "false"
+      DASK_DATAFRAME__QUERY_PLANNING: "False"
+      # cuGraph settings - use legacy algorithms
+      CUGRAPH_USE_LEGACY_ALGO: "1"
+      # CUDA settings
+      CUDA_LAUNCH_BLOCKING: "1"
+      RAPIDS_NO_INITIALIZE: "1"
+      # Thread limits
+      OMP_NUM_THREADS: "1"
+ENVEOF
+          
+          echo "=== Created docker-compose.override.yml with UCX/RAFT settings ==="
+          cat "$OVERRIDE_FILE"
+          echo "==================================================================="
+          
+          # Set COMPOSE_FILE for this step and persist to subsequent steps via GITHUB_ENV
+          FULL_COMPOSE_FILE="${DOCKER_COMPOSE_FILE}:$(pwd)/${OVERRIDE_FILE}"
+          export COMPOSE_FILE="$FULL_COMPOSE_FILE"
+          echo "COMPOSE_FILE=$COMPOSE_FILE" >> $GITHUB_ENV
+          echo "Using COMPOSE_FILE=$COMPOSE_FILE"
+          
+          docker compose --verbose up -d --wait --force-recreate
 
           end_time=$(date +%s)
           echo "Execution time: $((end_time - start_time)) seconds"
@@ -507,18 +554,18 @@ jobs:
       - name: Check containers status
         run: |
           docker ps -a
-          docker compose -f "$DOCKER_COMPOSE_FILE" logs --no-color --tail=200 > docker-logs.txt
+          docker compose logs --no-color --tail=200 > docker-logs.txt
           head -c 500000 docker-logs.txt
 
       - name: Ensure container is ready for testing
         run: |
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -u root backend bash -c '
+          docker compose exec -u root backend bash -c '
             apt-get update
             apt-get install -y libxml2-utils curl git
             apt-get clean
           '
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash <<'EOF'
+          docker compose exec -T -u root backend bash <<'EOF'
           set -euxo pipefail
 
           whoami
@@ -581,7 +628,7 @@ jobs:
       - name: Check GPU status before notebook execution
         run: |
           echo "=============== GPU Status Before Notebook Execution ==============="
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash -c '
+          docker compose exec -T -u root backend bash -c '
             echo "=== nvidia-smi ==="
             nvidia-smi
             
@@ -609,75 +656,34 @@ jobs:
 
           echo "=============== Executing notebook with nbclient ====================="
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -u root backend bash <<EOF
+          docker compose exec -u root backend bash <<EOF
           set -euxo pipefail
           export PYTHONUNBUFFERED=1
           
           # ============================================================================
-          # Option J: LAST RESORT - Bypass UCX completely with LD_PRELOAD tricks
+          # Environment variables are set at container level via docker-compose.override.yml
+          # These additional exports are belt-and-suspenders for the exec shell
           # ============================================================================
-          # Root cause: UCX library (libucs.so) crashes during cuCtxGetDevice_v2 on import
-          # Solution: Prevent UCX from being used at all levels
-          
-          # 1. Clear LD_PRELOAD and prevent UCX library loading issues
           export LD_PRELOAD=""
-          
-          # 2. Disable RAFT's UCX usage completely (multiple env var names)
-          export RAFT_USE_UCX=0
-          export RAFT_ENABLE_UCX=0
-          export RAFT_COMMS_UCX_ENABLED=0
-          
-          # 3. Disable Dask UCX and force TCP
-          export DASK_SCHEDULER=synchronous
-          export DASK_DATAFRAME__QUERY_PLANNING=False
-          export DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=tcp
-          export DASK_UCX__TCP=true
-          export DASK_UCX__INFINIBAND=false
-          export DASK_UCX__NVLINK=false
-          export DASK_UCX__CUDA_COPY=false
-          export DASK_UCX__RDMACM=false
-          export DASK_UCX__NET_DEVICES=""
-          export DASK_UCX__REUSE_ENDPOINTS=false
-          
-          # 4. UCX environment - disable everything
-          export UCX_TLS=tcp
-          export UCX_MEMTYPE_CACHE=n
-          export UCX_NET_DEVICES=all
-          export UCX_WARN_UNUSED_ENV_VARS=n
-          export UCX_LOG_LEVEL=error
-          
-          # 5. CUDA settings
-          export CUDA_LAUNCH_BLOCKING=1
-          export RAPIDS_NO_INITIALIZE=1
           export NUMBA_CUDA_USE_NVIDIA_BINDING=0
           
-          # 6. cuGraph specific - disable multi-GPU
-          export CUGRAPH_USE_LEGACY_ALGO=1
-          
-          # 7. Limit resources
-          export DASK_DISTRIBUTED__WORKER__NTHREADS=1
-          export OMP_NUM_THREADS=1
-          
           echo "╔══════════════════════════════════════════════════════════════════╗"
-          echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
+          echo "║           DEBUG: Verify Container Environment Variables          ║"
           echo "╚══════════════════════════════════════════════════════════════════╝"
           
           echo ""
-          echo "=== [1/6] Environment Variables (Option J - Last Resort) ==="
-          echo "--- RAFT/UCX Bypass ---"
-          echo "RAFT_USE_UCX=\$RAFT_USE_UCX"
-          echo "RAFT_ENABLE_UCX=\$RAFT_ENABLE_UCX"
-          echo "RAFT_COMMS_UCX_ENABLED=\$RAFT_COMMS_UCX_ENABLED"
-          echo "CUGRAPH_USE_LEGACY_ALGO=\$CUGRAPH_USE_LEGACY_ALGO"
-          echo "--- Dask Settings ---"
-          echo "DASK_SCHEDULER=\$DASK_SCHEDULER"
-          echo "DASK_DATAFRAME__QUERY_PLANNING=\$DASK_DATAFRAME__QUERY_PLANNING"
-          echo "--- UCX Settings ---"
-          echo "UCX_TLS=\$UCX_TLS"
-          echo "UCX_LOG_LEVEL=\$UCX_LOG_LEVEL"
-          echo "--- CUDA/Thread Settings ---"
-          echo "CUDA_LAUNCH_BLOCKING=\$CUDA_LAUNCH_BLOCKING"
-          echo "OMP_NUM_THREADS=\$OMP_NUM_THREADS"
+          echo "=== [1/6] UCX/RAFT/Dask Environment (set via docker-compose.override.yml) ==="
+          echo "--- RAFT/UCX ---"
+          echo "RAFT_USE_UCX=\${RAFT_USE_UCX:-NOT SET}"
+          echo "RAFT_ENABLE_UCX=\${RAFT_ENABLE_UCX:-NOT SET}"
+          echo "CUGRAPH_USE_LEGACY_ALGO=\${CUGRAPH_USE_LEGACY_ALGO:-NOT SET}"
+          echo "--- Dask ---"
+          echo "DASK_SCHEDULER=\${DASK_SCHEDULER:-NOT SET}"
+          echo "--- UCX ---"
+          echo "UCX_TLS=\${UCX_TLS:-NOT SET}"
+          echo "--- CUDA ---"
+          echo "CUDA_LAUNCH_BLOCKING=\${CUDA_LAUNCH_BLOCKING:-NOT SET}"
+          echo "OMP_NUM_THREADS=\${OMP_NUM_THREADS:-NOT SET}"
           echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
           
           echo ""
@@ -766,7 +772,7 @@ jobs:
           OUTPUT_NOTEBOOK_HTML="${{ env.OUTPUT_NOTEBOOK_HTML }}"
           DOCKER_WRITEABLE_DIR="${{ env.DOCKER_WRITEABLE_DIR }}"
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash -c "
+          docker compose exec -T -u root backend bash -c "
             echo '===============Check HTML file====================='
             if [ -s \"${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK_HTML}\" ]; then
                 echo \"${DOCKER_WRITEABLE_DIR}/${OUTPUT_NOTEBOOK_HTML} exists and has contents\"
@@ -852,7 +858,7 @@ jobs:
           fi
           EOS
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root -w /notebooks backend bash -s -- \
+          docker compose exec -T -u root -w /notebooks backend bash -s -- \
             "${{ env.OUTPUT_NOTEBOOK_HTML }}" \
             "${{ env.OUTPUT_PYTEST_COVERAGE_XML }}" \
             "${{ env.OUTPUT_PYTEST_RESULT_XML }}" \
@@ -876,10 +882,10 @@ jobs:
           mkdir -p "$ARTIFACT_DIR" || exit 1
           
           # Copy all generated files from container
-          docker compose -f "$DOCKER_COMPOSE_FILE" cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_NOTEBOOK_HTML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_NOTEBOOK_HTML not found"
-          docker compose -f "$DOCKER_COMPOSE_FILE" cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_COVERAGE_XML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_COVERAGE_XML not found"
-          docker compose -f "$DOCKER_COMPOSE_FILE" cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_RESULT_XML not found"
-          docker compose -f "$DOCKER_COMPOSE_FILE" cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_REPORT_HTML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_REPORT_HTML not found"
+          docker compose cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_NOTEBOOK_HTML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_NOTEBOOK_HTML not found"
+          docker compose cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_COVERAGE_XML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_COVERAGE_XML not found"
+          docker compose cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_RESULT_XML not found"
+          docker compose cp backend:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_REPORT_HTML" "$ARTIFACT_DIR/" 2>/dev/null || echo "Note: $OUTPUT_PYTEST_REPORT_HTML not found"
 
           echo "### 📊 Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -914,7 +920,7 @@ jobs:
 
       - name: Stop containers
         if: ${{ always() }}
-        run: docker compose -f "$DOCKER_COMPOSE_FILE" down
+        run: docker compose down
 
       - name: Clean up
         if: always()
