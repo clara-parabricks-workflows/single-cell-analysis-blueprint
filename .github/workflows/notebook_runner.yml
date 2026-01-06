@@ -614,54 +614,70 @@ jobs:
           export PYTHONUNBUFFERED=1
           
           # ============================================================================
-          # Option I: FINAL SOLUTION - Disable Dask distributed entirely
+          # Option J: LAST RESORT - Bypass UCX completely with LD_PRELOAD tricks
           # ============================================================================
-          # Root cause: raft_dask/UCX crashes during cuCtxGetDevice_v2 regardless of env vars
-          # Solution: Force synchronous single-threaded execution, bypass all distributed code
+          # Root cause: UCX library (libucs.so) crashes during cuCtxGetDevice_v2 on import
+          # Solution: Prevent UCX from being used at all levels
           
-          # 1. Disable Dask distributed scheduler - use synchronous execution
+          # 1. Clear LD_PRELOAD and prevent UCX library loading issues
+          export LD_PRELOAD=""
+          
+          # 2. Disable RAFT's UCX usage completely (multiple env var names)
+          export RAFT_USE_UCX=0
+          export RAFT_ENABLE_UCX=0
+          export RAFT_COMMS_UCX_ENABLED=0
+          
+          # 3. Disable Dask UCX and force TCP
           export DASK_SCHEDULER=synchronous
-          export DASK_DISTRIBUTED__SCHEDULER__ALLOWED_FAILURES=0
-          
-          # 2. Disable UCX completely
-          export UCX_TLS=tcp
-          export UCX_MEMTYPE_CACHE=n
-          export UCX_NET_DEVICES=all
+          export DASK_DATAFRAME__QUERY_PLANNING=False
           export DASK_DISTRIBUTED__COMM__DEFAULT_SCHEME=tcp
           export DASK_UCX__TCP=true
           export DASK_UCX__INFINIBAND=false
           export DASK_UCX__NVLINK=false
           export DASK_UCX__CUDA_COPY=false
           export DASK_UCX__RDMACM=false
+          export DASK_UCX__NET_DEVICES=""
+          export DASK_UCX__REUSE_ENDPOINTS=false
           
-          # 3. Force single-GPU mode for cuGraph/raft operations
-          export RAPIDS_NO_INITIALIZE=1
+          # 4. UCX environment - disable everything
+          export UCX_TLS=tcp
+          export UCX_MEMTYPE_CACHE=n
+          export UCX_NET_DEVICES=all
+          export UCX_WARN_UNUSED_ENV_VARS=n
+          export UCX_LOG_LEVEL=error
+          
+          # 5. CUDA settings
           export CUDA_LAUNCH_BLOCKING=1
-          export RAFT_ENABLE_UCX=0
+          export RAPIDS_NO_INITIALIZE=1
+          export NUMBA_CUDA_USE_NVIDIA_BINDING=0
           
-          # 4. Limit Dask worker resources
+          # 6. cuGraph specific - disable multi-GPU
+          export CUGRAPH_USE_LEGACY_ALGO=1
+          
+          # 7. Limit resources
           export DASK_DISTRIBUTED__WORKER__NTHREADS=1
-          export DASK_DISTRIBUTED__WORKER__MEMORY__TARGET=0.6
-          export DASK_DISTRIBUTED__WORKER__MEMORY__SPILL=0.7
-          export DASK_DISTRIBUTED__WORKER__MEMORY__PAUSE=0.8
-          export DASK_DISTRIBUTED__WORKER__MEMORY__TERMINATE=0.95
+          export OMP_NUM_THREADS=1
           
           echo "╔══════════════════════════════════════════════════════════════════╗"
           echo "║           DEBUG: Environment & GPU Diagnostics                   ║"
           echo "╚══════════════════════════════════════════════════════════════════╝"
           
           echo ""
-          echo "=== [1/6] Dask/UCX/CUDA Environment Variables ==="
-          echo "--- Dask Scheduler ---"
+          echo "=== [1/6] Environment Variables (Option J - Last Resort) ==="
+          echo "--- RAFT/UCX Bypass ---"
+          echo "RAFT_USE_UCX=\$RAFT_USE_UCX"
+          echo "RAFT_ENABLE_UCX=\$RAFT_ENABLE_UCX"
+          echo "RAFT_COMMS_UCX_ENABLED=\$RAFT_COMMS_UCX_ENABLED"
+          echo "CUGRAPH_USE_LEGACY_ALGO=\$CUGRAPH_USE_LEGACY_ALGO"
+          echo "--- Dask Settings ---"
           echo "DASK_SCHEDULER=\$DASK_SCHEDULER"
-          echo "DASK_DISTRIBUTED__WORKER__NTHREADS=\$DASK_DISTRIBUTED__WORKER__NTHREADS"
+          echo "DASK_DATAFRAME__QUERY_PLANNING=\$DASK_DATAFRAME__QUERY_PLANNING"
           echo "--- UCX Settings ---"
           echo "UCX_TLS=\$UCX_TLS"
-          echo "UCX_MEMTYPE_CACHE=\$UCX_MEMTYPE_CACHE"
-          echo "RAFT_ENABLE_UCX=\$RAFT_ENABLE_UCX"
-          echo "--- CUDA Settings ---"
+          echo "UCX_LOG_LEVEL=\$UCX_LOG_LEVEL"
+          echo "--- CUDA/Thread Settings ---"
           echo "CUDA_LAUNCH_BLOCKING=\$CUDA_LAUNCH_BLOCKING"
-          echo "RAPIDS_NO_INITIALIZE=\$RAPIDS_NO_INITIALIZE"
+          echo "OMP_NUM_THREADS=\$OMP_NUM_THREADS"
           echo "CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-not set}"
           
           echo ""
