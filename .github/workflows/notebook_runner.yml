@@ -522,7 +522,6 @@ jobs:
           echo "      DASK_UCX__INFINIBAND: 'false'" >> "$OVERRIDE_FILE"
           echo "      DASK_UCX__NVLINK: 'false'" >> "$OVERRIDE_FILE"
           echo "      DASK_UCX__CUDA_COPY: 'false'" >> "$OVERRIDE_FILE"
-          echo "      DASK_DATAFRAME__QUERY_PLANNING: 'False'" >> "$OVERRIDE_FILE"
           echo "      CUGRAPH_USE_LEGACY_ALGO: '1'" >> "$OVERRIDE_FILE"
           echo "      CUDA_LAUNCH_BLOCKING: '1'" >> "$OVERRIDE_FILE"
           echo "      RAPIDS_NO_INITIALIZE: '1'" >> "$OVERRIDE_FILE"
