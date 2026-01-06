@@ -505,36 +505,28 @@ jobs:
           # Docker Compose doesn't inherit shell exports - must use override file
           # ============================================================================
           OVERRIDE_FILE="docker-compose.override.yml"
-          cat > "$OVERRIDE_FILE" << 'ENVEOF'
-version: '3.8'
-services:
-  backend:
-    environment:
-      # UCX settings - disable GPU transports
-      UCX_TLS: "tcp"
-      UCX_MEMTYPE_CACHE: "n"
-      UCX_NET_DEVICES: "all"
-      UCX_LOG_LEVEL: "error"
-      UCX_WARN_UNUSED_ENV_VARS: "n"
-      # RAFT settings - disable UCX completely
-      RAFT_USE_UCX: "0"
-      RAFT_ENABLE_UCX: "0"
-      RAFT_COMMS_UCX_ENABLED: "0"
-      # Dask settings - synchronous execution, no UCX
-      DASK_SCHEDULER: "synchronous"
-      DASK_UCX__TCP: "true"
-      DASK_UCX__INFINIBAND: "false"
-      DASK_UCX__NVLINK: "false"
-      DASK_UCX__CUDA_COPY: "false"
-      DASK_DATAFRAME__QUERY_PLANNING: "False"
-      # cuGraph settings - use legacy algorithms
-      CUGRAPH_USE_LEGACY_ALGO: "1"
-      # CUDA settings
-      CUDA_LAUNCH_BLOCKING: "1"
-      RAPIDS_NO_INITIALIZE: "1"
-      # Thread limits
-      OMP_NUM_THREADS: "1"
-ENVEOF
+          echo "version: '3.8'" > "$OVERRIDE_FILE"
+          echo "services:" >> "$OVERRIDE_FILE"
+          echo "  backend:" >> "$OVERRIDE_FILE"
+          echo "    environment:" >> "$OVERRIDE_FILE"
+          echo "      UCX_TLS: tcp" >> "$OVERRIDE_FILE"
+          echo "      UCX_MEMTYPE_CACHE: n" >> "$OVERRIDE_FILE"
+          echo "      UCX_NET_DEVICES: all" >> "$OVERRIDE_FILE"
+          echo "      UCX_LOG_LEVEL: error" >> "$OVERRIDE_FILE"
+          echo "      UCX_WARN_UNUSED_ENV_VARS: n" >> "$OVERRIDE_FILE"
+          echo "      RAFT_USE_UCX: '0'" >> "$OVERRIDE_FILE"
+          echo "      RAFT_ENABLE_UCX: '0'" >> "$OVERRIDE_FILE"
+          echo "      RAFT_COMMS_UCX_ENABLED: '0'" >> "$OVERRIDE_FILE"
+          echo "      DASK_SCHEDULER: synchronous" >> "$OVERRIDE_FILE"
+          echo "      DASK_UCX__TCP: 'true'" >> "$OVERRIDE_FILE"
+          echo "      DASK_UCX__INFINIBAND: 'false'" >> "$OVERRIDE_FILE"
+          echo "      DASK_UCX__NVLINK: 'false'" >> "$OVERRIDE_FILE"
+          echo "      DASK_UCX__CUDA_COPY: 'false'" >> "$OVERRIDE_FILE"
+          echo "      DASK_DATAFRAME__QUERY_PLANNING: 'False'" >> "$OVERRIDE_FILE"
+          echo "      CUGRAPH_USE_LEGACY_ALGO: '1'" >> "$OVERRIDE_FILE"
+          echo "      CUDA_LAUNCH_BLOCKING: '1'" >> "$OVERRIDE_FILE"
+          echo "      RAPIDS_NO_INITIALIZE: '1'" >> "$OVERRIDE_FILE"
+          echo "      OMP_NUM_THREADS: '1'" >> "$OVERRIDE_FILE"
           
           echo "=== Created docker-compose.override.yml with UCX/RAFT settings ==="
           cat "$OVERRIDE_FILE"
