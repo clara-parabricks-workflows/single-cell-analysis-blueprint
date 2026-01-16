@@ -982,3 +982,16 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📊 [Download All Artifacts]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)" >> $GITHUB_STEP_SUMMARY
+
+  scan:
+    # needs: preflight
+    if: always()
+    uses: NVIDIA-AI-Blueprints/nim-docker-scanner/.github/workflows/scan.yml@main
+    with:
+      # exclude-dirs: 'external'
+      resolve-latest: true
+      scan-docker-images: true
+      scan-hosted-nim: true
+    secrets:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      NVCF_CONFIG_ON_GITHUB_TOKEN: ${{ secrets.NVCF_CONFIG_ON_GITHUB_TOKEN }}
