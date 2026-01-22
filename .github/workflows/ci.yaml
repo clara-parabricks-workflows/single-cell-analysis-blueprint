@@ -362,24 +362,47 @@ jobs:
           mkdir -p notebook_output/single_cell_analysis
           
           # Notebook → HTML mapping (see header comments for details)
-          # Rename generated HTML to expected filename for pytest
-          declare -A HTML_MAPPING=(
-            ["01_scRNA_analysis_preprocessing"]="01_demo_gpu_e2e.html"
-            ["02_scRNA_analysis_extended"]="02_decoupler.html"
-            ["03_scRNA_analysis_with_pearson_residuals"]="demo_gpu_e2e_with_PR.html"
-            ["04_scRNA_analysis_dask_out_of_core"]="out-of-core_processing.html"
-            ["05_scRNA_analysis_multi_GPU"]="multi_gpu_large_data_showcase.html"
-            ["06_scRNA_analysis_90k_brain_example"]="demo_gpu-seuratv3.html"
-            ["07_scRNA_analysis_1.3M_brain_example"]="demo_gpu-seuratv3-brain-1M.html"
-          )
+          # Using case statement for better shell compatibility (declare -A may fail in some environments)
+          case "$NOTEBOOK_BASENAME" in
+            "01_scRNA_analysis_preprocessing")
+              EXPECTED_HTML="01_demo_gpu_e2e.html"
+              ;;
+            "02_scRNA_analysis_extended")
+              EXPECTED_HTML="02_decoupler.html"
+              ;;
+            "03_scRNA_analysis_with_pearson_residuals")
+              EXPECTED_HTML="demo_gpu_e2e_with_PR.html"
+              ;;
+            "04_scRNA_analysis_dask_out_of_core")
+              EXPECTED_HTML="out-of-core_processing.html"
+              ;;
+            "05_scRNA_analysis_multi_GPU")
+              EXPECTED_HTML="multi_gpu_large_data_showcase.html"
+              ;;
+            "06_scRNA_analysis_90k_brain_example")
+              EXPECTED_HTML="demo_gpu-seuratv3.html"
+              ;;
+            "07_scRNA_analysis_1.3M_brain_example")
+              EXPECTED_HTML="demo_gpu-seuratv3-brain-1M.html"
+              ;;
+            *)
+              EXPECTED_HTML=""
+              ;;
+          esac
           
-          EXPECTED_HTML="${HTML_MAPPING[$NOTEBOOK_BASENAME]}"
+          echo "DEBUG: NOTEBOOK_BASENAME=${NOTEBOOK_BASENAME}"
+          echo "DEBUG: EXPECTED_HTML=${EXPECTED_HTML}"
+          echo "DEBUG: Looking for notebook_output/${NOTEBOOK_BASENAME}.html"
+          ls -la notebook_output/ || true
           
           if [ -n "$EXPECTED_HTML" ] && [ -f "notebook_output/${NOTEBOOK_BASENAME}.html" ]; then
             cp "notebook_output/${NOTEBOOK_BASENAME}.html" "notebook_output/single_cell_analysis/${EXPECTED_HTML}"
             echo "✓ Notebook HTML mapped: ${NOTEBOOK_BASENAME}.html -> ${EXPECTED_HTML}"
+            ls -la notebook_output/single_cell_analysis/
           else
-            echo "⚠ WARNING: No HTML mapping found for ${NOTEBOOK_BASENAME}"
+            echo "⚠ WARNING: No HTML mapping found or file missing for ${NOTEBOOK_BASENAME}"
+            echo "  Expected HTML: ${EXPECTED_HTML}"
+            echo "  Source file exists: $([ -f notebook_output/${NOTEBOOK_BASENAME}.html ] && echo 'YES' || echo 'NO')"
           fi
           
           # Run pytest with test image
