@@ -345,24 +345,16 @@ jobs:
           ls -la notebook_output/
 
       # ==========================================
-      # PHASE 5: Run pytest Notebook Tests
+      # PHASE 5: Prepare HTML for pytest
       # ==========================================
-      - name: Run Notebook Tests
-        id: pytest
+      - name: Prepare HTML for pytest
         run: |
-          echo "========================================"
-          echo "  RUNNING PYTEST: single_cell notebook"
-          echo "========================================"
-          
-          COMMIT_SHA=$(git rev-parse --short=7 HEAD)
           NOTEBOOK_BASENAME=$(basename "${{ matrix.notebook }}" .ipynb)
-          REPORT_FILE="single_cell_${NOTEBOOK_BASENAME}_${COMMIT_SHA}_test_report.html"
           
-          mkdir -p test_reports
           mkdir -p notebook_output/single_cell_analysis
           
           # Notebook → HTML mapping (see header comments for details)
-          # Using case statement for better shell compatibility (declare -A may fail in some environments)
+          # Using case statement for better shell compatibility
           case "$NOTEBOOK_BASENAME" in
             "01_scRNA_analysis_preprocessing")
               EXPECTED_HTML="01_demo_gpu_e2e.html"
@@ -390,49 +382,24 @@ jobs:
               ;;
           esac
           
-          echo "DEBUG: NOTEBOOK_BASENAME=${NOTEBOOK_BASENAME}"
-          echo "DEBUG: EXPECTED_HTML=${EXPECTED_HTML}"
-          echo "DEBUG: Looking for notebook_output/${NOTEBOOK_BASENAME}.html"
-          ls -la notebook_output/ || true
+          echo "Notebook: ${NOTEBOOK_BASENAME}"
+          echo "Expected HTML: ${EXPECTED_HTML}"
           
           if [ -n "$EXPECTED_HTML" ] && [ -f "notebook_output/${NOTEBOOK_BASENAME}.html" ]; then
             cp "notebook_output/${NOTEBOOK_BASENAME}.html" "notebook_output/single_cell_analysis/${EXPECTED_HTML}"
-            echo "✓ Notebook HTML mapped: ${NOTEBOOK_BASENAME}.html -> ${EXPECTED_HTML}"
-            ls -la notebook_output/single_cell_analysis/
+            echo "✓ HTML mapped: ${NOTEBOOK_BASENAME}.html -> ${EXPECTED_HTML}"
           else
-            echo "⚠ WARNING: No HTML mapping found or file missing for ${NOTEBOOK_BASENAME}"
-            echo "  Expected HTML: ${EXPECTED_HTML}"
-            echo "  Source file exists: $([ -f notebook_output/${NOTEBOOK_BASENAME}.html ] && echo 'YES' || echo 'NO')"
+            echo "⚠ WARNING: No HTML mapping or file missing for ${NOTEBOOK_BASENAME}"
           fi
           
-          # Run pytest with test image
-          docker run --rm \
-            --network host \
-            -v "$(pwd)/notebook_output:/app/input" \
-            -v "$(pwd)/test_reports:/app/reports" \
-            ${{ env.TEST_IMAGE }} \
-            pytest -m "single_cell and notebook" \
-              --disable-warnings \
-              --self-contained-html \
-              --html=/app/reports/${REPORT_FILE}
-          
-          echo ""
-          echo "Test report saved to: test_reports/${REPORT_FILE}"
-
-      - name: Upload Test Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: single-cell-test-report-${{ matrix.notebook }}
-          path: test_reports/
-          retention-days: 30
+          ls -la notebook_output/single_cell_analysis/ || true
 
       - name: Upload Notebook HTML
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: single-cell-notebook-html-${{ matrix.notebook }}
-          path: notebook_output/*.html
+          name: single-cell-html-${{ matrix.notebook }}
+          path: notebook_output/single_cell_analysis/
           retention-days: 30
 
       - name: Cleanup
@@ -444,11 +411,102 @@ jobs:
           echo "✓ Cleanup completed"
 
   # ============================================
+  # PYTEST: Run all notebook tests after all notebooks complete
+  # ============================================
+  pytest:
+    name: Run Notebook Tests
+    needs: [preflight, notebook-execution]
+    if: ${{ needs.notebook-execution.result == 'success' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker Login to NGC
+        env:
+          NGC_API_KEY: ${{ secrets.NGC_API_KEY }}
+        run: |
+          echo "${NGC_API_KEY}" | docker login nvcr.io -u '$oauthtoken' --password-stdin
+          echo "✓ NGC Docker login successful"
+
+      - name: Pull Test Image
+        run: |
+          echo "Pulling test image: ${{ env.TEST_IMAGE }}"
+          docker pull ${{ env.TEST_IMAGE }}
+          echo "✓ Test image pulled successfully"
+
+      - name: Download All Notebook HTML Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: single-cell-html-*
+          path: html_artifacts
+          merge-multiple: false
+
+      - name: Prepare HTML Files for pytest
+        run: |
+          echo "========================================"
+          echo "  PREPARING HTML FILES FOR PYTEST"
+          echo "========================================"
+          
+          mkdir -p notebook_input/single_cell_analysis
+          
+          # Collect all HTML files from artifacts
+          echo "Downloaded artifacts:"
+          find html_artifacts -type f -name "*.html" 2>/dev/null || echo "No HTML files found"
+          
+          # Copy all HTML files to the input directory
+          for html_file in $(find html_artifacts -type f -name "*.html"); do
+            filename=$(basename "$html_file")
+            cp "$html_file" "notebook_input/single_cell_analysis/${filename}"
+            echo "✓ Copied: ${filename}"
+          done
+          
+          echo ""
+          echo "Files ready for pytest:"
+          ls -la notebook_input/single_cell_analysis/
+
+      - name: Run pytest
+        id: pytest
+        run: |
+          echo "========================================"
+          echo "  RUNNING PYTEST: single_cell and notebook"
+          echo "========================================"
+          
+          COMMIT_SHA=$(git rev-parse --short=7 HEAD)
+          REPORT_FILE="single_cell_notebook_${COMMIT_SHA}_test_report.html"
+          
+          mkdir -p test_reports
+          
+          # Run pytest with test image
+          docker run --rm \
+            --network host \
+            -v "$(pwd)/notebook_input:/app/input" \
+            -v "$(pwd)/test_reports:/app/reports" \
+            ${{ env.TEST_IMAGE }} \
+            pytest -m "single_cell and notebook" \
+              --disable-warnings \
+              --self-contained-html \
+              --html=/app/reports/${REPORT_FILE}
+          
+          echo ""
+          echo "✓ pytest completed"
+          echo "Test report: test_reports/${REPORT_FILE}"
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: single-cell-pytest-report
+          path: test_reports/
+          retention-days: 30
+
+  # ============================================
   # SUMMARY: Generate final report
   # ============================================
   summary:
     name: Generate Summary
-    needs: [preflight, notebook-execution]
+    needs: [preflight, notebook-execution, pytest]
     if: always()
     runs-on: ubuntu-latest
     
@@ -472,6 +530,7 @@ jobs:
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Preflight | ${{ needs.preflight.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Notebook Execution | ${{ needs.notebook-execution.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pytest | ${{ needs.pytest.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "## Test Configuration" >> $GITHUB_STEP_SUMMARY
@@ -518,7 +577,9 @@ jobs:
         id: set_result
         if: always()
         run: |
-          if [ "${{ needs.preflight.result }}" == "success" ] && [ "${{ needs.notebook-execution.result }}" == "success" ]; then
+          if [ "${{ needs.preflight.result }}" == "success" ] && \
+             [ "${{ needs.notebook-execution.result }}" == "success" ] && \
+             [ "${{ needs.pytest.result }}" == "success" ]; then
             echo "RESULT=PASS" >> $GITHUB_OUTPUT
           else
             echo "RESULT=FAIL" >> $GITHUB_OUTPUT
@@ -548,6 +609,7 @@ jobs:
               <tr><th>Job</th><th>Status</th></tr>
               <tr><td>Preflight</td><td>${{ needs.preflight.result }}</td></tr>
               <tr><td>Notebook Execution</td><td>${{ needs.notebook-execution.result }}</td></tr>
+              <tr><td>Pytest</td><td>${{ needs.pytest.result }}</td></tr>
             </table>
             
             <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a></p>
