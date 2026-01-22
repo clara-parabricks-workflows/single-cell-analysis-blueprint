@@ -13,6 +13,25 @@
 # Note: This project has 7 analysis notebooks executed via matrix (serial)
 #       No UI tests - only notebook tests
 #
+# -----------------------------------------------------------------------------
+# Notebook → HTML Mapping (for pytest)
+# -----------------------------------------------------------------------------
+# The pytest test cases expect specific HTML filenames in /app/input/single_cell_analysis/
+# This mapping is based on matching notebook titles with HTML content.
+#
+# | Notebook                                    | Expected HTML filename              |
+# |---------------------------------------------|-------------------------------------|
+# | 01_scRNA_analysis_preprocessing.ipynb       | 01_demo_gpu_e2e.html                |
+# | 02_scRNA_analysis_extended.ipynb            | 02_decoupler.html                   |
+# | 03_scRNA_analysis_with_pearson_residuals    | demo_gpu_e2e_with_PR.html           |
+# | 04_scRNA_analysis_dask_out_of_core.ipynb    | out-of-core_processing.html         |
+# | 05_scRNA_analysis_multi_GPU.ipynb           | multi_gpu_large_data_showcase.html  |
+# | 06_scRNA_analysis_90k_brain_example.ipynb   | demo_gpu-seuratv3.html              |
+# | 07_scRNA_analysis_1.3M_brain_example.ipynb  | demo_gpu-seuratv3-brain-1M.html     |
+#
+# Missing test case (no corresponding notebook in current repo):
+#   - spatial_autocorr.html (Spatial Autocorrelation analysis)
+#
 # =============================================================================
 
 name: Single-Cell Analysis Blueprint CI
@@ -342,10 +361,25 @@ jobs:
           mkdir -p test_reports
           mkdir -p notebook_output/single_cell_analysis
           
-          # Copy notebook HTML to expected location for tests
-          if [ -f "notebook_output/${NOTEBOOK_BASENAME}.html" ]; then
-            cp "notebook_output/${NOTEBOOK_BASENAME}.html" "notebook_output/single_cell_analysis/"
-            echo "✓ Notebook HTML prepared for testing"
+          # Notebook → HTML mapping (see header comments for details)
+          # Rename generated HTML to expected filename for pytest
+          declare -A HTML_MAPPING=(
+            ["01_scRNA_analysis_preprocessing"]="01_demo_gpu_e2e.html"
+            ["02_scRNA_analysis_extended"]="02_decoupler.html"
+            ["03_scRNA_analysis_with_pearson_residuals"]="demo_gpu_e2e_with_PR.html"
+            ["04_scRNA_analysis_dask_out_of_core"]="out-of-core_processing.html"
+            ["05_scRNA_analysis_multi_GPU"]="multi_gpu_large_data_showcase.html"
+            ["06_scRNA_analysis_90k_brain_example"]="demo_gpu-seuratv3.html"
+            ["07_scRNA_analysis_1.3M_brain_example"]="demo_gpu-seuratv3-brain-1M.html"
+          )
+          
+          EXPECTED_HTML="${HTML_MAPPING[$NOTEBOOK_BASENAME]}"
+          
+          if [ -n "$EXPECTED_HTML" ] && [ -f "notebook_output/${NOTEBOOK_BASENAME}.html" ]; then
+            cp "notebook_output/${NOTEBOOK_BASENAME}.html" "notebook_output/single_cell_analysis/${EXPECTED_HTML}"
+            echo "✓ Notebook HTML mapped: ${NOTEBOOK_BASENAME}.html -> ${EXPECTED_HTML}"
+          else
+            echo "⚠ WARNING: No HTML mapping found for ${NOTEBOOK_BASENAME}"
           fi
           
           # Run pytest with test image
