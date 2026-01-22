@@ -330,7 +330,6 @@ jobs:
       # ==========================================
       - name: Run Notebook Tests
         id: pytest
-        continue-on-error: true
         run: |
           echo "========================================"
           echo "  RUNNING PYTEST: single_cell notebook"
@@ -358,8 +357,7 @@ jobs:
             pytest -m "single_cell and notebook" \
               --disable-warnings \
               --self-contained-html \
-              --html=/app/reports/${REPORT_FILE} \
-            || echo "pytest_exit_code=$?" >> $GITHUB_OUTPUT
+              --html=/app/reports/${REPORT_FILE}
           
           echo ""
           echo "Test report saved to: test_reports/${REPORT_FILE}"
