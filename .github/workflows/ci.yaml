@@ -29,6 +29,7 @@ env:
   QA_TESTER_REPO: https://github.com/bp-cicd-org/qa-tester.git
   DOCKER_IMG_NAME: nvcr.io/nvidia/rapidsai/notebooks
   DOCKER_IMG_TAG: "25.06-cuda12.8-py3.12"
+  ENABLE_EMAIL_NOTIFICATION: false  # Set to false to disable email notifications
 
 jobs:
   # ============================================
@@ -470,7 +471,7 @@ jobs:
 
       - name: Send Email Notification
         uses: dawidd6/action-send-mail@6e71c855c9a091d80a519621b9fd3e8d252ca40c
-        if: always()
+        if: always() && env.ENABLE_EMAIL_NOTIFICATION == 'true'
         with:
           server_address: smtp.gmail.com
           server_port: 587
