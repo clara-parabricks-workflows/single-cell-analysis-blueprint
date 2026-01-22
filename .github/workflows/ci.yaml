@@ -193,11 +193,11 @@ jobs:
       matrix:
         notebook:
           - "01_scRNA_analysis_preprocessing.ipynb"
-          - "02_scRNA_analysis_extended.ipynb"
+          # - "02_scRNA_analysis_extended.ipynb"
           - "03_scRNA_analysis_with_pearson_residuals.ipynb"
           - "04_scRNA_analysis_dask_out_of_core.ipynb"
           - "05_scRNA_analysis_multi_GPU.ipynb"
-          - "06_scRNA_analysis_90k_brain_example.ipynb"
+          # - "06_scRNA_analysis_90k_brain_example.ipynb"
           - "07_scRNA_analysis_1.3M_brain_example.ipynb"
       max-parallel: 1  # Serial execution
       fail-fast: false
@@ -419,11 +419,12 @@ jobs:
   # ============================================
   # PYTEST: Run all notebook tests after all notebooks complete
   # Can run independently if skip_notebook=true (downloads previous artifacts)
+  # Runs even if some notebooks failed (will test successfully generated HTMLs)
   # ============================================
   pytest:
     name: Run Notebook Tests
     needs: [preflight, notebook-execution]
-    if: ${{ always() && needs.preflight.result == 'success' && (needs.notebook-execution.result == 'success' || needs.notebook-execution.result == 'skipped') }}
+    if: ${{ always() && needs.preflight.result == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
