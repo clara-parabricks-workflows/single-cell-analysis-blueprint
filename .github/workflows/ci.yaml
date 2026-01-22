@@ -42,6 +42,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      skip_notebook:
+        description: 'Skip notebook execution, reuse last HTML artifacts'
+        type: boolean
+        default: false
 
 env:
   TEST_IMAGE: nvcr.io/rw983xdqtcdp/auto_test_team/blueprint-github-test-image:latest
@@ -174,11 +179,12 @@ jobs:
 
   # ============================================
   # NOTEBOOK EXECUTION: Matrix-based serial execution
+  # Skip if skip_notebook=true (reuse previous artifacts)
   # ============================================
   notebook-execution:
     name: Notebook - ${{ matrix.notebook }}
     needs: preflight
-    if: ${{ needs.preflight.outputs.preflight_passed == 'true' }}
+    if: ${{ needs.preflight.outputs.preflight_passed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.skip_notebook) }}
     runs-on: arc-runner-set-oke-org-poc-4-gpu
     # runs-on: arc-runners-org-nvidia-ai-bp-4-gpu
     timeout-minutes: 60
@@ -186,13 +192,13 @@ jobs:
     strategy:
       matrix:
         notebook:
-        #   - "01_scRNA_analysis_preprocessing.ipynb"
-        #   - "02_scRNA_analysis_extended.ipynb"
+          - "01_scRNA_analysis_preprocessing.ipynb"
+          - "02_scRNA_analysis_extended.ipynb"
           - "03_scRNA_analysis_with_pearson_residuals.ipynb"
           - "04_scRNA_analysis_dask_out_of_core.ipynb"
           - "05_scRNA_analysis_multi_GPU.ipynb"
-        #   - "06_scRNA_analysis_90k_brain_example.ipynb"
-        #   - "07_scRNA_analysis_1.3M_brain_example.ipynb"
+          - "06_scRNA_analysis_90k_brain_example.ipynb"
+          - "07_scRNA_analysis_1.3M_brain_example.ipynb"
       max-parallel: 1  # Serial execution
       fail-fast: false
     
@@ -412,11 +418,12 @@ jobs:
 
   # ============================================
   # PYTEST: Run all notebook tests after all notebooks complete
+  # Can run independently if skip_notebook=true (downloads previous artifacts)
   # ============================================
   pytest:
     name: Run Notebook Tests
     needs: [preflight, notebook-execution]
-    if: ${{ needs.notebook-execution.result == 'success' }}
+    if: ${{ always() && needs.preflight.result == 'success' && (needs.notebook-execution.result == 'success' || needs.notebook-execution.result == 'skipped') }}
     runs-on: ubuntu-latest
     
     steps:
@@ -436,12 +443,28 @@ jobs:
           docker pull ${{ env.TEST_IMAGE }}
           echo "✓ Test image pulled successfully"
 
-      - name: Download All Notebook HTML Artifacts
+      # Try to download artifacts from current workflow run
+      - name: Download Current Run Artifacts
+        id: download_current
         uses: actions/download-artifact@v4
         with:
           pattern: single-cell-html-*
           path: html_artifacts
           merge-multiple: false
+        continue-on-error: true
+
+      # If skip_notebook=true and no current artifacts, download from previous runs
+      - name: Download Previous Run Artifacts
+        if: ${{ steps.download_current.outcome == 'failure' || (github.event_name == 'workflow_dispatch' && inputs.skip_notebook) }}
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: ci.yaml
+          branch: ${{ github.ref_name }}
+          name_is_regexp: true
+          name: single-cell-html-.*
+          path: html_artifacts
+          search_artifacts: true
+          if_no_artifact_found: fail
 
       - name: Prepare HTML Files for pytest
         run: |
