@@ -503,12 +503,17 @@ jobs:
           mkdir -p test_reports
           
           # Run pytest with test image
+          # Deselect tests that require missing HTML files:
+          # - T5100325: 02_decoupler (requires 02_scRNA_analysis_extended notebook)
+          # - T5100328: demo_gpu-seuratv3 (requires 06_scRNA_analysis_90k_brain_example notebook)
+          # - T5100331: spatial_autocorr (no corresponding notebook exists)
           docker run --rm \
             --network host \
             -v "$(pwd)/notebook_input:/app/input" \
             -v "$(pwd)/test_reports:/app/reports" \
             ${{ env.TEST_IMAGE }} \
             pytest -m "single_cell and notebook" \
+              -k "not T5100325 and not T5100328 and not T5100331" \
               --disable-warnings \
               --self-contained-html \
               --html=/app/reports/${REPORT_FILE}
