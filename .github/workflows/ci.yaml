@@ -185,8 +185,8 @@ jobs:
     name: Notebook - ${{ matrix.notebook }}
     needs: preflight
     if: ${{ needs.preflight.outputs.preflight_passed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.skip_notebook) }}
-    runs-on: arc-runner-set-oke-org-poc-4-gpu
-    # runs-on: arc-runners-org-nvidia-ai-bp-4-gpu
+    # runs-on: arc-runner-set-oke-org-poc-4-gpu
+    runs-on: arc-runners-org-nvidia-ai-bp-4-gpu
     timeout-minutes: 60
     
     strategy:
