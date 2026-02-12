@@ -53,7 +53,7 @@ env:
   QA_TESTER_REPO: https://github.com/bp-cicd-org/qa-tester.git
   DOCKER_IMG_NAME: nvcr.io/nvidia/rapidsai/notebooks
   DOCKER_IMG_TAG: "25.06-cuda12.8-py3.12"
-  ENABLE_EMAIL_NOTIFICATION: false  # Set to false to disable email notifications
+  ENABLE_EMAIL_NOTIFICATION: true  # Set to false to disable email notifications
 
 jobs:
   # ============================================
