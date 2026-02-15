@@ -17,7 +17,7 @@ numba==0.61.2
 numpy==2.2.6
 pandas==2.2.3
 patsy==1.0.1
-pillow==11.2.1
+pillow==11.3.0
 pynndescent==0.5.13
 rapids-singlecell==0.12.6
 scanpy==1.11.1
