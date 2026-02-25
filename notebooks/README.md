@@ -68,12 +68,8 @@ By the completion of this notebook, a user will be able to do the following:
 By the completion of this notebook, a user will be able to perform the same steps as Notebook 05, but with the following:
 - Process massive single-cell datasets without exceeding memory limits
 - Fully utilize all available GPUs, scaling performance across multiple devices
-- Enable chunk-based execution, efficiently managing memory by loading only necessary data
+- Enable chunk-based execution, efficiently managing memory by loading only necessary data.
 
-### **Notebook 06_scRNA_analysis_90k_brain_example.ipynb - End to end example on Brain Cells**
+### **Notebook 06_scRNA_analysis_1.0M_brain_example.ipynb - End to end example on 1M Brain Cells**
 
-By the completion of this noteobok, a user will be able to perform similar steps to Notebook 01 (end to end demo) but on brain cells.
-
-### **Notebook 07_scRNA_analysis_1.3M_brain_example.ipynb - End to end example on 1M Brain Cells**
-
-By the completion of this noteobok, a user will be able to perform similar steps to demo_gpu-seuratv3 but on 1M brain cells.
+In this noteobok, a user will perform similar steps as the Notebook 01 (end to end demo), but on 1M brain cells.
