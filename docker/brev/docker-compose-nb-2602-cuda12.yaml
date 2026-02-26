@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: nvcr.io/nvidia/rapidsai/notebooks:26.02-cuda13-py3.12
+    image: nvcr.io/nvidia/rapidsai/notebooks:26.02-cuda12-py3.12
     pull_policy: always
     ulimits:
       memlock: -1
@@ -22,7 +22,7 @@ services:
       - "0.0.0.0:8787:8787"      # Dask dashboard
       - "0.0.0.0:8786:8786"      # Dask scheduler
     volumes:
-      - /home/shadeform/single-cell-analysis-blueprint:/notebooks/
+      - /home/ubuntu/single-cell-analysis-blueprint:/notebooks/
     user: root
     working_dir: /notebooks
     entrypoint: ["/home/rapids/entrypoint.sh"]
