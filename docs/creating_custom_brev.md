@@ -31,7 +31,7 @@ A second option to set up `rapids-singlecell` is to start by [Creating a Custom 
 
 1. Follow the instructions for [Creating a RAPIDS Brev Instance](https://docs.rapids.ai/deployment/stable/cloud/nvidia/brev/#option-1-setting-up-your-brev-gpu-instance).  Remember the RAPIDS version for Step 3.  Launch the instance.
 2. Download this repository into the instance.
-3. Download the `rapids-singlecell` repository into the instance. Follow their [installation instructions](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html). It is important to have the same RAPIDS version and CUDA Toolkit version as your installed RAPIDS versions. 
+3. Download the `rapids-singlecell` repository into the instance. Follow their [installation instructions](https://rapids-singlecell.readthedocs.io/en/latest/installation.html). It is important to have the same RAPIDS version and CUDA Toolkit version as your installed RAPIDS versions. 
  For Brev, we currently default to CUDA Tool Kit 12.8 to support Blackwell GPUs. Therefore, you can install `rapids-singelcell` using `mamba env create -f conda/rsc_<RAPIDS VERSION>.yml'
     - Example to install `rapids-singelcell` for 25.06
     ```code
