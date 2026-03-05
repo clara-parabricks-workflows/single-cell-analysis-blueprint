@@ -51,8 +51,6 @@ This is an overview of methods that can be used to investigate transcriptional r
 
 By the completion of this notebook, a user will be able to remove unwanted sources of variation using Pearson Residuals to normalize. This is a different approach to analysis from Notebook 01. After filtering, we introduce a normalization step toa address the potential issues in how we previously removed unwanted sources of variation.
 
-
-
 ### **Notebook 04_scRNA_analysis_dask_out_of_core.ipynb - Scale analysis to 11M cells easily and quickly leveraging Dask**
 
 By the completion of this notebook, a user will be able to do the following:
@@ -72,4 +70,4 @@ By the completion of this notebook, a user will be able to perform the same step
 
 ### **Notebook 06_scRNA_analysis_1.0M_brain_example.ipynb - End to end example on 1M Brain Cells**
 
-In this noteobok, a user will perform similar steps as the Notebook 01 (end to end demo), but on 1M brain cells.
+In this notebook, a user will perform similar steps as the Notebook 01 (end to end demo), but on 1M brain cells.

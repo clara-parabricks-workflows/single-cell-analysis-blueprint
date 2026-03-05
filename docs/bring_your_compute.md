@@ -13,8 +13,7 @@ All provisioned systems need to be RAPIDS capable. Here's what is required:
 | L40s/L40 | A5000 or better | 4090 |
 | A10/A10s | RTX6000 or better | 3090 |
 
-The [demo_gpu-seuratv3-brain-1M](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/06_scRNA_analysis_1.0M_brain_example.ipynb) requires a large multigpu system. The [out-of-core_processing](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) notebook, even using the 11 million cell dataset, and the [demo_gpu-seuratv3](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/demo_gpu-seuratv3.ipynb) are respectively similar and can be run on one of the GPUs above, but a 48GB GPU is recommended.
-
+The [demo_gpu-seuratv3-brain-1M](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/06_scRNA_analysis_1.0M_brain_example.ipynb) requires a large multigpu system. The [out-of-core_processing](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) notebook can be run on one of the GPUs above, but a 48GB GPU is recommended.
 
 <i class="fas fa-desktop"></i> **OS:**
 - <i class="fas fa-check-circle"></i> Linux distributions with `glibc>=2.28` (released in August 2018), which include the following:
@@ -36,7 +35,7 @@ git clone https://github.com/clara-parabricks-workflows/single-cell-analysis-blu
 ```
 
 ### 3. Install Packaging Environment Software:
-RAPIDS can be installed using Pip, Conda, or Docker.  To replicate the same expereince as in the Launchable, it is recommended to use Docker for installation.  
+RAPIDS can be installed using Pip, Conda, or Docker.  To replicate the same experience as in the Launchable, it is recommended to use Docker for installation.  
 <i class="fas fa-download text-purple"></i> **3.1 Get Docker:** Use the code below to download and install Docker on your system
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -65,7 +64,7 @@ pip install -r requirements.txt
 ```
 
 For additional information on RAPIDS-singlecell please visit the [RAPIDS-singlecell Docs](https://rapids-singlecell.readthedocs.io/)
-For alternate installation instructions, please refer to the [RAPIDS-singlecell Install Guide](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html) to install using [pip](https://rapids-singlecell.readthedocs.io/en/latest/installation.html#pypi), [Conda](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#conda), or [Docker](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#docker)
+For alternate installation instructions, please refer to the [RAPIDS-singlecell Install Guide](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html) to install using [pip](https://rapids-singlecell.readthedocs.io/en/latest/installation.html#pypi), [Conda](https://rapids-singlecell.readthedocs.io/en/latest/Installation.html#conda), or [Docker](https://rapids-singlecell.readthedocs.io/en/latest/installation.html#docker)
 
 ## Tips and Tricks
 1. If after clicking a "Healthy" Port 8888 link in `Deploy with Brev: Step 4`, JupyterLab does not start, or the notebooks don't show, please try again in a few seconds.  There is a known issue where there system needs a minute or two Also, sometimes, the page needs to be refreshed to update the status.
