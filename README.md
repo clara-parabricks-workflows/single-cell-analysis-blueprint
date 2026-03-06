@@ -14,8 +14,8 @@ If you like these notebooks and this GPU accelerated capability, and want to sup
 The quickest way to use these blueprints is to use one of our pre-configured [NVIDIA Brev](https://console.brev.dev/) resources.
 
 1. Select your resource size, and click "Deploy Now":  
-  * For a **Standard Instance** (L40s), click here: [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-2xn8JayrpXlBwGXkKASSomq6gXi)  
-  * For a **Advanced Instance** (2x RTX Pro 6000), click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-2xn9bEVtfQgLQXHpJUlzESILpfV)
+  * For a **Standard Instance** (L40s), click here: [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-3AXUjmYgpuhv3le7p9YCLw9AGK9)  
+  * For a **Advanced Instance** (2x RTX Pro 6000), click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-3AXUQbrvfp2EeAtOUA2OhLnSVg8)
 
 2. Click **Deploy Launchable** on the Brev.dev Launchable page
 
