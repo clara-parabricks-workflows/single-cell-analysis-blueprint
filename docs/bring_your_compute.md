@@ -1,4 +1,3 @@
-
 If you are provisioning this on a non-Brev cloud instance, workstation, or local machine, please follow the steps below:
 
 ### 1. Provision a System Meeting These Requirements
@@ -13,7 +12,9 @@ All provisioned systems need to be RAPIDS capable. Here's what is required:
 | L40s/L40 | A5000 or better | 4090 |
 | A10/A10s | RTX6000 or better | 3090 |
 
-The [demo_gpu-seuratv3-brain-1M](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/06_scRNA_analysis_1.0M_brain_example.ipynb) requires a large multigpu system. The [out-of-core_processing](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) notebook can be run on one of the GPUs above, but a 48GB GPU is recommended.
+
+The [out-of-core_processing](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) notebook requires a large multigpu system when using the 11 million cell dataset,  but a 48GB GPU is recommended if using the 1 million cell dataset.  The workflows are respectively similar.
+
 
 <i class="fas fa-desktop"></i> **OS:**
 - <i class="fas fa-check-circle"></i> Linux distributions with `glibc>=2.28` (released in August 2018), which include the following:
@@ -22,10 +23,10 @@ The [demo_gpu-seuratv3-brain-1M](https://github.com/clara-parabricks-workflows/s
   - [Fedora](https://fedoraproject.org/), minimum version 29
   - [Linux Mint](https://linuxmint.com/), minimum version 20
   - [Rocky Linux](https://rockylinux.org/) / [Alma Linux](https://almalinux.org/) / [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux), minimum version 8
-  - [Ubuntu](https://ubuntu.com/), minimum version 20.04
+  - [Ubuntu](https://ubuntu.com/), minimum version 24.04
 - <i class="fas fa-check-circle"></i> Windows 11 using a [WSL2 specific install](https://docs.rapids.ai/install/#wsl2)
 
-<i class="fas fa-download text-purple"></i> **CUDA 12 & latest NVIDIA Drivers:** Install the latest drivers for your system [HERE](https://www.nvidia.com/en-us/drivers/)
+<i class="fas fa-download text-purple"></i> **CUDA 13 & latest NVIDIA Drivers:** Install the latest drivers for your system [HERE](https://www.nvidia.com/en-us/drivers/)
 
  **Note:** RAPIDS is tested with and officially supports the versions listed above. Newer CUDA and driver versions may also work with RAPIDS. See [CUDA compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html) for details.
 
@@ -41,13 +42,13 @@ RAPIDS can be installed using Pip, Conda, or Docker.  To replicate the same expe
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 ```
-<i class="fas fa-download text-purple"></i> **3.2 Get RAPIDS:** Use the code below to pull the same RAPIDS container used in the Launchable.  Example for 25.06:
+<i class="fas fa-download text-purple"></i> **3.2 Get RAPIDS:** Use the code below to pull the same RAPIDS container used in the Launchable.  Example for 26.02:
 ```
 docker run --gpus all --pull always --rm -it \
     --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 \
     -p 8888:8888 -p 8787:8787 -p 8786:8786
     -v ~/single-cell-analysis-blueprint:/home/rapids/notebooks/single-cell-analysis-blueprint
-    nvcr.io/nvidia/rapidsai/notebooks:25.06-cuda12.8-py3.12
+    nvcr.io/nvidia/rapidsai/notebooks:26.02-cuda13-py3.12
 ```
 **Note:** The volume is currently assuming that you cloned the `single-cell-analysis-blueprint` repository into your `HOME` folder (`~/single-cell-analysis-blueprint`).  If you did not clone it there, please change the `~/single-cell-analysis-blueprint` portion of the above to the correct path before running the command.
 
@@ -73,5 +74,4 @@ For alternate installation instructions, please refer to the [RAPIDS-singlecell 
 4. To conserve GPU memory, please remember to shut down your completed notebook's kernel before starting a new notebook.
 5. If your data download gets interrupted, please delete the files you intended to download and try again.
 6. The Standard RSC Instance (L40s) has 128GB of space (~90GB user usable).    
-7. The Large RSC Instance (8x H100) has the same 128GB of space as the Standard RSC Instance, but there is a special `data` folder is mapped to a 1.12TB disk.  Data retention on that disk (in that folder) is not guaranteed.  YMMV.
-8. If using an ARM based system, please conda install `compile` before installing `RAPIDS-singlecell` so that you can build `scikit-misc` from source/
+7. If using an ARM based system, please conda install `compile` before installing `RAPIDS-singlecell` so that you can build `scikit-misc` from source/
