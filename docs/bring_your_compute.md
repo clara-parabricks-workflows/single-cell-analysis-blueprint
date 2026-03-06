@@ -15,6 +15,7 @@ All provisioned systems need to be RAPIDS capable. Here's what is required:
 
 The [out-of-core_processing](https://github.com/clara-parabricks-workflows/single-cell-analysis-blueprint/blob/main/notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) notebook requires a large multigpu system when using the 11 million cell dataset,  but a 48GB GPU is recommended if using the 1 million cell dataset.  The workflows are respectively similar.
 
+
 <i class="fas fa-desktop"></i> **OS:**
 - <i class="fas fa-check-circle"></i> Linux distributions with `glibc>=2.28` (released in August 2018), which include the following:
   - [Arch Linux](https://archlinux.org/), minimum version 2018-08-02
