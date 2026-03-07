@@ -61,12 +61,12 @@ By the completion of this notebook, a user will be able to do the following:
 - Scale gene expression
 - Compute PCA using GPU acceleration
 
-### **Notebook 05_scRNA_analysis_multi_GPU.ipynb - Multi-GPU showcase using persist**
+### **Notebook 05_spatial_demo.ipynb - Spatial Analysis with rapids-singlecell and Squidpy**
 
-By the completion of this notebook, a user will be able to perform the same steps as Notebook 05, but with the following:
-- Process massive single-cell datasets without exceeding memory limits
-- Fully utilize all available GPUs, scaling performance across multiple devices
-- Enable chunk-based execution, efficiently managing memory by loading only necessary data.
+By the completion of this notebook, a user will be able to do the following:
+- Compute spatial autocorrelation using Moran's I (global spatial structure) and Geary's C (local expression differences) to identify niche-specific expression and spatial gradients
+- Perform co-occurrence analysis to measure the probability of cell-type pairs co-localizing across varying spatial distances, revealing tissue organization and cell-cell interactions
+- Leverage GPU-accelerated spatial implementations in rapids-singlecell for significant speedups over CPU-based methods
 
 ### **Notebook 06_scRNA_analysis_1.0M_brain_example.ipynb - End to end example on 1M Brain Cells**
 
