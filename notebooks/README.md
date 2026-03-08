@@ -72,12 +72,12 @@ By the completion of this notebook, a user will be able to perform the same step
 
 In this notebook, a user will perform similar steps as the Notebook 01 (end to end demo), but on 1M brain cells.
 
-### **Notebook 07_perturbation_analysis_invivo_brain_example.ipynb - Perturbation Analysis: In Vivo Brain Example**
+### **Notebook 07_perturbation_analysis_invivo_brain_example.ipynb - Perturbation Analysis: In Vivo Brain CRISPR Atlas Example**
 
-This notebook demonstrates GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~4.2M cells, ~2,000 target genes across hundreds of neuronal types) using RAPIDS-singlecell and Dask. By the completion of this notebook, a user will be able to do the following:
+This notebook demonstrates GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~3.5M cells, targeting ~2,000 genes across hundreds of neuronal types) using RAPIDS-singlecell. By the completion of this notebook, a user will be able to do the following:
 
 - Load a preprocessed Zarr dataset from HuggingFace into a GPU-ready AnnData object using Dask for out-of-core processing
 - Configure a local CUDA cluster and tune GPU memory management with RAPIDS Memory Manager (RMM)
 - Build GPU-accelerated PCA embeddings on the full dataset and visualize cell populations with UMAP
 - Compute pairwise E-distances between perturbation groups and non-targeting controls across all cell types to build a global perturbation-response map
-- Overlay external essential gene lists (Blomen et al., Science 2015) and use Mann-Whitney U tests to show that essential gene perturbations produce significantly higher E-distances
+- Overlay external essential gene lists (Blomen et al., Science 2015) in select cell types and use Mann-Whitney U tests to show that essential gene perturbations produce significantly higher E-distances
