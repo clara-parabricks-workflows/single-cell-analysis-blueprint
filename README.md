@@ -45,14 +45,15 @@ The outline below is a suggested exploration flow.  Unless otherwise noted, you 
 
 For those who are new to doing basic analysis for single cell data, the end to end analysis of [01_scRNA_analysis_preprocessing.ipynb](notebooks/01_scRNA_analysis_preprocessing.ipynb) is the best place to start, where you are walked through the steps of data preprocessing, cleanup, visualization, and investigation.
 
-| Notebook         | Description |Min GPU Size /<br>Instance |
+| Notebook         | Description | Instance Type |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--|
-| 01_scRNA_analysis_preprocessing.ipynb | End to end workflow, where we understand the cells, run ETL on the data set then visiualize and explore the results. <br>This tutorial is good for all users | 24GB /<br>Standard RSC Instance | 
-| 02_scRNA_analysis_extended.ipynb | This notebook continues from the outputs of 01_scRNA_analysis_preprocessing.ipynb as an overview of methods that can be used to investigate transcriptional regulation | 24GB /<br>Standard RSC Instance |
-| 03_scRNA_analysis_with_pearson_residuals.ipynb  | End to end workflow, like 01_scRNA_analysis_preprocessing.ipynb, but uses pearson residuals for normalization. | 24GB /<br>Standard RSC Instance |
-| 04_scRNA_analysis_dask_out_of_core.ipynb | In this notebook, we show the scalability of the analysis to up to 11M cells easily by using Dask and out of core processing.<br>**Requires a 80GB+ GPU for 11M cells, 24GB for 1.3M cells ** | 24-80GB /<br>Advanced RSC Instance Recommended |
-| 05_scRNA_analysis_multi_GPU.ipynb | This notebook enhances the 11M cell dataset analysis with Dask without exceeding memory limits.  <br>It fully scales to utilize all available GPUs, uses chunk-based execution, and efficiently manages memory<br>**Requires 8x H100s or better.  For all other GPUs systems, please run 04_scRNA_analysis_dask_out_of_core.ipynb instead**| 8x 80GB /<br>Advanced RSC Instance |
-| 06_scRNA_analysis_1.3M_brain_example.ipynb | In this notebook, we scale up the analysis of the 01_scRNA_analysis_preprocessing.ipynb example to 1 million brain cells.<br>**Requires the Advanced RSC Instance (2x 80GB+ GPU, like an RTX Pro 6000 or H100)** |  80GB /<br>Advanced RSC Instance |  
+| 01_scRNA_analysis_preprocessing.ipynb | End to end workflow, where we understand the cells, run ETL on the data set then visiualize and explore the results. <br>This tutorial is good for all users | Standard Instance | 
+| 02_scRNA_analysis_extended.ipynb | This notebook continues from the outputs of 01_scRNA_analysis_preprocessing.ipynb as an overview of methods that can be used to investigate transcriptional regulation | Standard Instance |
+| 03_scRNA_analysis_with_pearson_residuals.ipynb  | End to end workflow, like 01_scRNA_analysis_preprocessing.ipynb, but uses pearson residuals for normalization. | Standard Instance |
+| 04_scRNA_analysis_dask_out_of_core.ipynb | In this notebook, we show the scalability of the analysis to up to 11M cells easily by using Dask and out of core processing. | Advanced Instance |
+| 05_spatial_demo.ipynb | GPU-accelerated spatial analysis using rapids-singlecell and Squidpy. Covers spatial autocorrelation (Moran's I and Geary's C) and co-occurrence analysis to reveal cell-type co-localization and tissue organization patterns. | Standard Instance |
+| 06_scRNA_analysis_1.0M_brain_example.ipynb | In this notebook, we scale up the analysis of the 01_scRNA_analysis_preprocessing.ipynb example to 1 million brain cells. |  Advanced Instance |
+| 07_perturbation_analysis_invivo_brain_example.ipynb | GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~4.2M cells, ~2,000 target genes). Computes pairwise E-distances between perturbation groups and non-targeting controls across neuronal cell types to build a global perturbation-response map. | Advanced Instance |
 
 
 You can find more detail on each notebook in the [Notebooks README](notebooks/README.md).
