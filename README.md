@@ -53,7 +53,7 @@ For those who are new to doing basic analysis for single cell data, the end to e
 | 04_scRNA_analysis_dask_out_of_core.ipynb | In this notebook, we show the scalability of the analysis to up to 11M cells easily by using Dask and out of core processing. | Advanced Instance |
 | 05_spatial_demo.ipynb | GPU-accelerated spatial analysis using rapids-singlecell and Squidpy. Covers spatial autocorrelation (Moran's I and Geary's C) and co-occurrence analysis to reveal cell-type co-localization and tissue organization patterns. | Standard Instance |
 | 06_scRNA_analysis_1.0M_brain_example.ipynb | In this notebook, we scale up the analysis of the 01_scRNA_analysis_preprocessing.ipynb example to 1 million brain cells. |  Advanced Instance |
-| 07_perturbation_analysis_invivo_brain_example.ipynb | GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~4.2M cells, ~2,000 target genes). Computes pairwise E-distances between perturbation groups and non-targeting controls across neuronal cell types to build a global perturbation-response map. | Advanced Instance |
+| 07_perturbation_analysis_invivo_brain_example.ipynb | GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~3.5M cells, ~2,000 target genes). Computes pairwise E-distances between perturbation groups and non-targeting controls across neuronal cell types to build a global perturbation-response map. | Advanced Instance |
 
 
 You can find more detail on each notebook in the [Notebooks README](notebooks/README.md).
