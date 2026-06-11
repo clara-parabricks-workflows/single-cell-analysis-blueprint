@@ -33,7 +33,7 @@ concurrency:
 
 env:
   CONTAINER_NAME: sc-blueprint-backend
-  RAPIDS_IMAGE: nvcr.io/nvidia/rapidsai/notebooks:26.02-cuda12-py3.12
+  RAPIDS_IMAGE: nvcr.io/nvidia/rapidsai/notebooks:26.04-cuda12-py3.12
   # Space-separated paths relative to repo root (under /notebooks in the container). Order matters.
   PAPERMILL_NOTEBOOKS: notebooks/01_scRNA_analysis_preprocessing.ipynb notebooks/02_scRNA_analysis_extended.ipynb notebooks/03_scRNA_analysis_with_pearson_residuals.ipynb notebooks/04_scRNA_analysis_dask_out_of_core.ipynb notebooks/05_spatial_demo.ipynb notebooks/06_scRNA_analysis_1.0M_brain_example.ipynb notebooks/07_perturbation_analysis_invivo_brain_example.ipynb
   BLUEPRINT_TEST_IMAGE: nvcr.io/rw983xdqtcdp/auto_test_team/blueprint-github-test-image:latest
@@ -381,6 +381,9 @@ jobs:
           else
             echo "WARNING: requirements.txt not found under /notebooks; skipping uv pip install"
           fi
+
+          # Install the precompiled rapids-singlecell wheel matching the container's CUDA 12 runtime
+          uv pip install --system rapids-singlecell-cu12==0.15.2
 
           if [ -f /opt/conda/etc/profile.d/conda.sh ]; then
             source /opt/conda/etc/profile.d/conda.sh
