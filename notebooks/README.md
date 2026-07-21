@@ -1,7 +1,5 @@
 # Detailed Overview of the Notebooks
 
-
-
 ### **Notebook 01_scRNA_analysis_preprocessing.ipynb: Basic Demo Workflow**
 
 By the completion of this notebook, a user will be able to do the following:
