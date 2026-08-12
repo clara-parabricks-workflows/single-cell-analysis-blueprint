@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: nvcr.io/nvidia/rapidsai/notebooks:26.08-cuda12-py3.12
+    image: nvcr.io/nvidia/rapidsai/notebooks:26.08-cuda13-py3.14
     pull_policy: always
     ulimits:
       memlock: -1
