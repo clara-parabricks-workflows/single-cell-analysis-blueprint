@@ -7,8 +7,9 @@ uv --version
 
 # Install all additional libraries
 cd /notebooks
+mamba install -c conda-forge -c rapidsai compilers -y
 uv pip install --system -r requirements.txt
-mamba install -c conda-forge -c rapidsai cupy==14.0.1 numpy==2.2.6 -y
+mamba install -c conda-forge -c rapidsai cupy==14.1.1 numpy==2.5.1 -y
 
 set -m
 
