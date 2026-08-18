@@ -30,7 +30,7 @@ PIMS==0.7
 pooch==1.9.0
 pynndescent==0.6.0
 rangehttpserver==1.4.0
-rapids_singlecell==0.16.1
+rapids_singlecell-cu13==0.16.1
 s3fs==2026.2.0
 scanpy==1.12.2
 scikit-misc==0.5.2
