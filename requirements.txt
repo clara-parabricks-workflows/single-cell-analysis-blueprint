@@ -39,6 +39,7 @@ session-info2==0.4.1
 slicerator==1.1.0
 spatial_image==1.2.3
 spatialdata==0.7.2
+spatialdata-io==0.6.0
 spatialdata-plot==0.2.14
 squidpy==1.8.1
 typeguard==4.5.1
