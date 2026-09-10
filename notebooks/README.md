@@ -89,5 +89,5 @@ This notebook demonstrates GPU-accelerated perturbation analysis on a whole-brai
 - Annotate cell types from marker genes using `rsc.dcg.ulm` (decoupler-GPU), following the Human Breast Cell Atlas (Kumar et al., Nature 2023) and the dataset's own 10x Genomics AACR 2026 poster
 - Detect spatial domains ("niches") with `rsc.gr.calculate_niche` (`flavor="cellcharter"`), aggregating neighbor expression in PCA space
 - Characterize niches and run pairwise spatial-structure analyses: co-occurrence, neighborhood enrichment, and ligand-receptor signaling (`rsc.gr.ligrec`)
-- Detect spatially variable genes with `rsc.gr.spatial_autocorr` (Moran's I) and rank marker genes per spatial domain
+- Detect spatially variable genes with `rsc.gr.spatial_autocorr` (Moran's I)
 - Visualize results with `scanpy`/`squidpy` plotting and zoomed tissue regions via `spatialdata-plot` (morphology image + cell boundaries)
