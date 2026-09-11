@@ -15,3 +15,6 @@ singlet_gex.zarr/
 preprocessed_gex.zarr.tar.gz
 rapids_edist_results/
 metadata/
+data
+data/
+notebooks/data/

@@ -91,3 +91,12 @@ This notebook demonstrates GPU-accelerated perturbation analysis on a whole-brai
 - Characterize niches and run pairwise spatial-structure analyses: co-occurrence, neighborhood enrichment, and ligand-receptor signaling (`rsc.gr.ligrec`)
 - Detect spatially variable genes with `rsc.gr.spatial_autocorr` (Moran's I)
 - Visualize results with `scanpy`/`squidpy` plotting and zoomed tissue regions via `spatialdata-plot` (morphology image + cell boundaries)
+
+### **Notebook 09_spatial_atera_interactive_viewer.ipynb - Interactive Viewer for the ATERA Xenium Dataset**
+
+*(Draft)* Companion to `08_spatial_atera_breast_cancer_example.ipynb`: renders its annotated result as a linked [Vitessce](http://vitessce.io/) viewer embedded in the notebook. By the completion of this notebook, a user will be able to do the following:
+
+- Write a browser-ready `SpatialData` Zarr store: multiscale OME-NGFF morphology image, cell-boundary polygons, and a table holding a dense highly-variable-gene panel, the `obs` annotations and the UMAP
+- Configure a multi-view Vitessce layout (tissue, layer controller, UMAP, cell sets, gene list, per-cell-type expression distribution) linked through shared coordination scopes, so a gene or cell-set selection in one view updates the others
+- Explore 170k segmented cells at full image resolution, recolored by cell type, spatial niche or any gene in the panel
+- Serve the store from the notebook kernel, or export the same view as a static config for hosting elsewhere
