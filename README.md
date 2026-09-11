@@ -59,6 +59,8 @@ For those who are new to doing basic analysis for single cell data, the end to e
 | 05_spatial_demo.ipynb | GPU-accelerated spatial analysis using rapids-singlecell and Squidpy. Covers spatial autocorrelation (Moran's I and Geary's C) and co-occurrence analysis to reveal cell-type co-localization and tissue organization patterns. | Standard Instance |
 | 06_scRNA_analysis_1.0M_brain_example.ipynb | In this notebook, we scale up the analysis of the 01_scRNA_analysis_preprocessing.ipynb example to 1 million brain cells. |  Advanced Instance |
 | 07_perturbation_analysis_invivo_brain_example.ipynb | GPU-accelerated perturbation analysis on a whole-brain single-nucleus CRISPR atlas (~3.5M cells, ~2,000 target genes). Computes pairwise E-distances between perturbation groups and non-targeting controls across neuronal cell types to build a global perturbation-response map. | Advanced Instance |
+| 08_spatial_atera_breast_cancer_example.ipynb *(draft)* | End-to-end imaging-based spatial workflow (segmentation QC, niches via `cellcharter`-style GPU aggregation, co-occurrence/ligand-receptor signaling, spatially variable genes, zoomed `spatialdata-plot` regions) on the public 10x Atera Xenium FFPE breast cancer dataset, starting from the raw `outs/` bundle. | Standard Instance |
+| 09_spatial_atera_interactive_viewer.ipynb *(draft)* | Linked `vitessce` viewer for the annotated ATERA result of notebook 08: morphology image, cell-boundary polygons, UMAP, cell-type/niche sets and per-gene expression in one interactive layout, served from the notebook kernel. | Standard Instance |
 
 You can find more detail on each notebook in the [Notebooks README](notebooks/README.md).
 
