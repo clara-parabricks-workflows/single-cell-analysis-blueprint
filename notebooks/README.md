@@ -84,13 +84,14 @@ This notebook demonstrates GPU-accelerated perturbation analysis on a whole-brai
 
 *(Draft)* An end-to-end imaging-based spatial workflow on the public 10x Genomics Atera WTA Preview FFPE Human Breast Cancer dataset (170,057 cells x 18,028 genes), starting from the raw Xenium-format `outs/` bundle. A deeper, Xenium/Atera-specific companion to `05_spatial_demo.ipynb`. By the completion of this notebook, a user will be able to do the following:
 
-- Load a raw Xenium/Atera `outs/` bundle with `spatialdata_io.xenium` and build the spatial neighbor graph
-- Run segmentation-quality diagnostics and standard QC/normalization for imaging-based spatial data
-- Annotate cell types from marker genes using `rsc.dcg.ulm` (decoupler-GPU), following the Human Breast Cell Atlas (Kumar et al., Nature 2023) and the dataset's own 10x Genomics AACR 2026 poster
-- Detect spatial domains ("niches") with `rsc.gr.calculate_niche` (`flavor="cellcharter"`), aggregating neighbor expression in PCA space
+- Load a raw Xenium/Atera `outs/` bundle with `spatialdata_io.xenium`
+- Apply standard QC and normalization for imaging-based spatial data
+- Build a pruned Delaunay spatial neighbor graph with `rsc.gr.spatial_neighbors_delaunay`
+- Annotate cell types from marker genes using `rsc.dcg.ulm` (decoupler-GPU), following the dataset's own 10x Genomics AACR 2026 poster and the Human Breast Cell Atlas (Kumar et al., Nature 2023)
+- Detect spatial domains ("niches") with `rsc.gr.calculate_niche_cellcharter`, aggregating neighbor expression in PCA space
 - Characterize niches and run pairwise spatial-structure analyses: co-occurrence, neighborhood enrichment, and ligand-receptor signaling (`rsc.gr.ligrec`)
 - Detect spatially variable genes with `rsc.gr.spatial_autocorr` (Moran's I)
-- Visualize results with `scanpy`/`squidpy` plotting and zoomed tissue regions via `spatialdata-plot` (morphology image + cell boundaries)
+- Visualize results with `scanpy` and `squidpy` plotting
 
 ### **Notebook 09_spatial_atera_interactive_viewer.ipynb - Interactive Viewer for the ATERA Xenium Dataset**
 
